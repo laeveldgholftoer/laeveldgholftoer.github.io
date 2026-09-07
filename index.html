@@ -16,6 +16,28 @@
   /* die kerf en die tuis-strepie op 'n foon wat die app volskerm wys */
   .masthead { padding-top: calc(18px + env(safe-area-inset-top)); }
   .wrap { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+
+  /* Safari bied nie self aan om te installeer nie, so ons wys die stappe.
+     Verskyn net op 'n iPhone, en net solank die app nog in die blaaier is. */
+  .wenk {
+    position: fixed; left: 12px; right: 12px; z-index: 30;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 14px; border-radius: 16px;
+    background: #0E2620; color: #F3EEE2;
+    box-shadow: 0 6px 26px rgba(0,0,0,.28);
+    font-size: 14px; line-height: 1.35;
+  }
+  .wenk svg { flex: 0 0 auto; width: 21px; height: 21px; color: #7FC4A2; }
+  .wenk p { margin: 0; flex: 1 1 auto; }
+  .wenk b { font-weight: 600; }
+  .wenk button {
+    flex: 0 0 auto; width: 30px; height: 30px; padding: 0;
+    background: none; border: 0; border-radius: 50%; cursor: pointer;
+    color: #9DB0A6; font-size: 19px; line-height: 1;
+  }
+  .wenk button:hover { background: rgba(255,255,255,.08); color: #F3EEE2; }
+  body.het-wenk .wrap { padding-bottom: calc(140px + env(safe-area-inset-bottom)); }
 </style>
 </head>
 <body>
@@ -1203,6 +1225,48 @@ var LGT_START = function (DATA) {
     window.addEventListener("load", function () {
       navigator.serviceWorker.register("sw.js").catch(function () {});
     });
+  }
+
+  // ---- "sit my op jou tuisskerm" ------------------------------------------
+  // Chrome op Android vra self; Safari nooit. Ons wys dus net op 'n iPhone die
+  // twee stappe, en net solank die app nog in die blaaier oop is.
+  var ua = navigator.userAgent;
+  var isIOS = /iPad|iPhone|iPod/.test(ua) ||
+              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var isSafari = !/CriOS|FxiOS|EdgiOS|OPiOS|Snapchat|FBAN|FBAV|Instagram|Line/.test(ua);
+  var opTuisskerm = navigator.standalone === true ||
+                    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+
+  function weggeklik() {
+    try { return localStorage.getItem("lgt-wenk") === "weg"; } catch (e) { return false; }
+  }
+
+  function wysWenk() {
+    if (!isIOS || opTuisskerm || weggeklik()) { return; }
+    var deel = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M12 15V3"/><path d="m8 7 4-4 4 4"/>' +
+      '<path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/></svg>';
+    var teks = isSafari
+      ? 'Tik <b>Deel</b> onderaan en kies <b>Voeg by tuisskerm</b> &mdash; dan is die telbord een tik weg.'
+      : 'Maak hierdie bladsy in <b>Safari</b> oop om dit op jou tuisskerm te sit.';
+    var d = document.createElement("div");
+    d.className = "wenk";
+    d.setAttribute("role", "note");
+    d.innerHTML = deel + "<p>" + teks + '</p><button type="button" aria-label="Maak toe">&times;</button>';
+    d.querySelector("button").addEventListener("click", function () {
+      try { localStorage.setItem("lgt-wenk", "weg"); } catch (e) {}
+      document.body.classList.remove("het-wenk");
+      d.remove();
+    });
+    document.body.appendChild(d);
+    document.body.classList.add("het-wenk");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wysWenk);
+  } else {
+    wysWenk();
   }
 }());
 </script>
