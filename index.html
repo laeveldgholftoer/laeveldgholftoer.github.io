@@ -752,7 +752,8 @@ var LGT_START = function (DATA) {
     views = views.concat([
       { id: "gabba", label: "Gatgabba" },
       { id: "kort",  label: "Kortgat" },
-      { id: "lank",  label: "Langgat" }
+      { id: "lank",  label: "Langgat" },
+      { id: "veld",  label: "Spelers" }
     ]);
 
     var dele = String(T.toer).split(" · ");
@@ -911,6 +912,36 @@ var LGT_START = function (DATA) {
     }).join("");
   }
 
+  // Die veld, van die laagste indeks af. Die indeks is vir die hele toer
+  // vasgemaak; die voorgee wat elke dag tel, staan op die dagblaaie.
+  function renderVeld() {
+    var rye = players.slice().sort(function (a, b) {
+      return a.idx - b.idx || a.naam.localeCompare(b.naam);
+    });
+
+    document.getElementById("course").textContent = "Spelers";
+    document.querySelector(".strap").classList.remove("solo");
+    document.getElementById("meta").textContent =
+      rye.length + " spelers · vaste toerindeks";
+    document.getElementById("leader").innerHTML = "";
+    document.getElementById("leader").hidden = true;
+
+    document.getElementById("head").innerHTML =
+      "<tr>" +
+        '<th class="c-pos" scope="col">Nr</th>' +
+        '<th class="c-naam" scope="col">Speler</th>' +
+        '<th class="c-punte" scope="col">Indeks</th>' +
+      "</tr>";
+
+    document.getElementById("body").innerHTML = rye.map(function (r) {
+      return "<tr>" +
+        '<td class="c-pos">' + r.nr + "</td>" +
+        '<td class="c-naam">' + r.naam + beker(r.naam) + "</td>" +
+        '<td class="c-punte">' + hcp(r.idx) + "</td>" +
+      "</tr>";
+    }).join("");
+  }
+
   function toerKlaar() {
     return gespeelRondte.every(function (v) { return v; });
   }
@@ -1021,6 +1052,13 @@ var LGT_START = function (DATA) {
         });
         return;
       }
+    }
+    if (current === "veld") {
+      renderVeld();
+      Array.prototype.forEach.call(tabs.children, function (b) {
+        b.setAttribute("aria-selected", String(b.dataset.id === current));
+      });
+      return;
     }
     if (current === "kort" || current === "lank") {
       renderGate(current);
@@ -1191,14 +1229,9 @@ var LGT_START = function (DATA) {
     window.scrollTo(0, 0);
   });
 
-  // Begin by die nuutste toer waarvoor daar al tellings is.
+  // Begin altyd by die huidige toer - ook voor die eerste rondte gelaai is,
+  // want dan wys die dagblaaie darem die afslaantye. TOERE is nuutste eerste.
   var begin = 0;
-  for (var t = 0; t < TOERE.length; t++) {
-    var enige = TOERE[t].spelers.some(function (p) {
-      return p[3].some(function (v) { return v > 0; });
-    });
-    if (enige) { begin = t; break; }
-  }
   try {
     var vorige = localStorage.getItem("lgt-toer");
     TOERE.forEach(function (t, i) { if (String(t.jaar) === vorige) { begin = i; } });
