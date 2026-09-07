@@ -1247,13 +1247,15 @@ var LGT_START = function (DATA) {
       'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
       '<path d="M12 15V3"/><path d="m8 7 4-4 4 4"/>' +
       '<path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/></svg>';
+    // Die boodskap is in Engels omdat iOS se eie knoppies Engels is - "Share"
+    // en "Add to Home Screen" is presies wat op die speler se skerm staan.
     var teks = isSafari
-      ? 'Tik <b>Deel</b> onderaan en kies <b>Voeg by tuisskerm</b> &mdash; dan is die telbord een tik weg.'
-      : 'Maak hierdie bladsy in <b>Safari</b> oop om dit op jou tuisskerm te sit.';
+      ? 'Tap <b>Share</b> below, then <b>Add to Home Screen</b> &mdash; the leaderboard is then one tap away.'
+      : 'Open this page in <b>Safari</b> to add it to your Home Screen.';
     var d = document.createElement("div");
     d.className = "wenk";
     d.setAttribute("role", "note");
-    d.innerHTML = deel + "<p>" + teks + '</p><button type="button" aria-label="Maak toe">&times;</button>';
+    d.innerHTML = deel + "<p>" + teks + '</p><button type="button" aria-label="Close">&times;</button>';
     d.querySelector("button").addEventListener("click", function () {
       try { localStorage.setItem("lgt-wenk", "weg"); } catch (e) {}
       document.body.classList.remove("het-wenk");
