@@ -1,0 +1,30 @@
+{
+  "name": "Laeveld Gholftoer Telbord",
+  "short_name": "LGT Telbord",
+  "description": "Die Laeveld Gholftoer se telbord - tellings na elke rondte.",
+  "lang": "af",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0E2620",
+  "theme_color": "#0E2620",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

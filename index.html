@@ -1,0 +1,1211 @@
+<!doctype html>
+<html lang="af">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Laeveld Gholftoer Telbord</title>
+<meta name="theme-color" content="#0E2620">
+<meta name="description" content="Die Laeveld Gholftoer se telbord - tellings na elke rondte.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-32.png" sizes="32x32">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LGT Telbord">
+<style>
+  /* die kerf en die tuis-strepie op 'n foon wat die app volskerm wys */
+  .masthead { padding-top: calc(18px + env(safe-area-inset-top)); }
+  .wrap { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+</style>
+</head>
+<body>
+
+
+
+<style>
+  /* ---- light: scorecard paper ------------------------------------ */
+  :root {
+    --ground:      #F1EAD9;
+    --surface:     #F8F3E7;
+    --surface-alt: #E9E0CB;
+    --text:        #142E26;
+    --text-dim:    #5C6B62;
+    --rule:        #C9BFA6;
+    --rule-soft:   #DED4BC;
+    --accent:      #B03A26;
+    --brass:       #96742A;
+    --bar:         #2E5F4A;
+    --bar-soft:    #B9C9BE;
+    --chip:        #E2D8C0;
+    --chip-on:     #142E26;
+    --chip-on-txt: #F3EEE2;
+    --shadow:      0 1px 0 rgba(20,46,38,.06);
+  }
+  /* ---- dark: painted leaderboard --------------------------------- */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0E2620;
+      --surface:     #13312A;
+      --surface-alt: #0A1D18;
+      --text:        #F3EEE2;
+      --text-dim:    #9DB0A6;
+      --rule:        #2A4A40;
+      --rule-soft:   #1E3C34;
+      --accent:      #E4614A;
+      --brass:       #CFA84E;
+      --bar:         #7FC4A2;
+      --bar-soft:    #23433A;
+      --chip:        #1B3B33;
+      --chip-on:     #F3EEE2;
+      --chip-on-txt: #0E2620;
+      --shadow:      0 1px 0 rgba(0,0,0,.25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0E2620;
+    --surface:     #13312A;
+    --surface-alt: #0A1D18;
+    --text:        #F3EEE2;
+    --text-dim:    #9DB0A6;
+    --rule:        #2A4A40;
+    --rule-soft:   #1E3C34;
+    --accent:      #E4614A;
+    --brass:       #CFA84E;
+    --bar:         #7FC4A2;
+    --bar-soft:    #23433A;
+    --chip:        #1B3B33;
+    --chip-on:     #F3EEE2;
+    --chip-on-txt: #0E2620;
+    --shadow:      0 1px 0 rgba(0,0,0,.25);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 580px; margin: 0 auto; padding: 0 16px 64px; }
+
+  /* ---- masthead --------------------------------------------------- */
+  .masthead {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--ground);
+    border-bottom: 1px solid var(--rule);
+    padding-top: 18px;
+  }
+  .masthead-inner { max-width: 580px; margin: 0 auto; padding: 0 16px; }
+
+  .eyebrow {
+    font-size: 10.5px; font-weight: 600; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--brass); margin: 0 0 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  h1 {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-weight: 700; font-size: 30px; line-height: 1.02;
+    letter-spacing: .01em; text-transform: uppercase;
+    margin: 0; text-wrap: balance;
+  }
+
+  .brand { display: flex; align-items: center; gap: 13px; margin-bottom: 11px; }
+  .toerkies-wrap { margin-left: auto; flex: 0 0 auto; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  #toerkies {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 14px; font-weight: 700; letter-spacing: .02em;
+    color: var(--text); background: var(--chip);
+    border: 1px solid var(--rule); border-radius: 2px;
+    padding: 4px 4px 4px 6px; cursor: pointer;
+  }
+  #toerkies:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #toerkies[hidden] { display: none; }
+  .brand-txt { min-width: 0; flex: 1 1 auto; }
+  .logo {
+    flex: 0 0 auto; width: 48px; height: auto; display: block;
+    color: var(--text);
+  }
+  @media (max-width: 359px) {
+    .logo { width: 40px; }
+    .eyebrow { font-size: 9px; letter-spacing: .06em; }
+    #toerkies { font-size: 13px; }
+  }
+
+  .tabs {
+    display: flex; gap: 6px; overflow-x: auto; padding: 0 0 12px;
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 0 0 auto; border: 1px solid var(--rule); background: var(--chip);
+    color: var(--text); border-radius: 2px; padding: 6px 11px;
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 15px; font-weight: 600; letter-spacing: .04em;
+    text-transform: uppercase; cursor: pointer; white-space: nowrap;
+    transition: background .12s ease, color .12s ease;
+  }
+  .tab:hover { border-color: var(--brass); }
+  .tab[aria-selected="true"] {
+    background: var(--chip-on); color: var(--chip-on-txt); border-color: var(--chip-on);
+  }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---- round strap ------------------------------------------------ */
+  .strap {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; padding: 16px 0 10px; border-bottom: 2px solid var(--text);
+  }
+  .strap-course {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 21px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .03em; margin: 0; white-space: nowrap;
+  }
+  .strap-meta {
+    font-size: 12px; color: var(--text-dim);
+    text-align: right; min-width: 0; flex: 0 1 auto;
+  }
+  .strap-course { min-width: 0; }
+
+  /* ---- leader ----------------------------------------------------- */
+  .leader[hidden] { display: none; }
+  .leader {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 0 16px; border-bottom: 1px solid var(--rule);
+  }
+  .leader-flag {
+    flex: 0 0 auto; width: 34px; height: 34px; display: grid; place-items: center;
+    background: var(--accent); color: #FFF6EF; border-radius: 1px;
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 20px; font-weight: 700; line-height: 1;
+  }
+  .leader-body { min-width: 0; flex: 1 1 auto; }
+  .leader-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--brass);
+  }
+  .leader-name {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 24px; font-weight: 700; line-height: 1.08;
+    text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .leader-score {
+    flex: 0 0 auto; text-align: right;
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .leader-score b { display: block; font-size: 34px; font-weight: 700; line-height: 1; }
+  .leader-score span {
+    font-size: 10px; font-weight: 600; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--text-dim);
+  }
+
+  /* ---- board ------------------------------------------------------ */
+  .board { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .board thead th {
+    font-size: 10px; font-weight: 600; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--text-dim);
+    text-align: right; padding: 10px 0 6px; border-bottom: 1px solid var(--rule);
+    font-family: "Source Sans 3", sans-serif; white-space: nowrap; font-size: 10px;
+  }
+  .board thead th.c-pos, .board thead th.c-naam { text-align: left; }
+  .board tbody td {
+    padding: 9px 0; border-bottom: 1px solid var(--rule-soft);
+    font-variant-numeric: tabular-nums; text-align: right;
+  }
+  .board tbody tr:last-child td { border-bottom: none; }
+
+  /* widths apply to head and body; type sizing only to body cells */
+  .board .c-pos   { width: 26px; padding-right: 4px; text-align: left; }
+  .board .c-naam  { width: 100%; padding-right: 8px; text-align: left; }
+  .board .c-vgee  { width: 36px; }
+  .board .c-punte { width: 44px; padding-left: 8px; }
+  .board .c-spark { width: 26px; padding-left: 8px; }
+  .board .c-mov   { width: 26px; padding-left: 6px; text-align: right; }
+
+  .board tbody .c-pos {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 17px; font-weight: 600; color: var(--text-dim);
+  }
+  .board tbody tr.top .c-pos { color: var(--accent); }
+  .board tbody .c-naam { font-size: 15px; line-height: 1.22; }
+  .board tbody .c-naam .idx {
+    display: block; font-size: 11px; color: var(--text-dim);
+    overflow-wrap: anywhere;
+  }
+  .board tbody .c-vgee { font-size: 13px; color: var(--text-dim); }
+  .board tbody .c-punte {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 20px; font-weight: 700;
+  }
+  .board tbody .c-mov { font-size: 11px; }
+  .board tbody .c-naam .pair { display: block; }
+  .beker {
+    display: inline-flex; align-items: center; gap: 1px;
+    margin-left: 5px; color: var(--brass); vertical-align: -1px;
+  }
+  .beker svg { width: 12px; height: 12px; flex: 0 0 auto; }
+  .beker b {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 11px; font-weight: 700; line-height: 1;
+  }
+  .board tbody tr.oopmaak { cursor: pointer; }
+  .board tbody tr.oopmaak:hover td { background: var(--surface); }
+  .board tbody tr.oopmaak:focus-visible td { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .board tbody tr.oopmaak[aria-expanded="true"] td { border-bottom-color: transparent; }
+  .board tbody tr.oopmaak[aria-expanded="true"] .wys { opacity: 0; }
+  .wys { color: var(--brass); font-size: 10px; letter-spacing: .06em; }
+  .board tbody tr.gat-ry-houer > td { padding: 0 0 14px; text-align: left; }
+  .geen-gate { font-size: 13px; font-style: italic; color: var(--text-dim);
+    text-align: left !important; padding-top: 14px !important; }
+
+  .gat { display: flex; flex-direction: column; gap: 6px; }
+  .gat-ry {
+    display: grid; grid-template-columns: repeat(10, 1fr);
+    gap: 1px; font-variant-numeric: tabular-nums;
+  }
+  .gh, .gp { text-align: center; padding: 2px 0; font-size: 11px; }
+  .gh { color: var(--text-dim); border-bottom: 1px solid var(--rule-soft); }
+  .gh.p3 { color: var(--brass); }
+  .gh.p5 { color: var(--bar); }
+  .gp {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 15px; font-weight: 600; background: var(--surface);
+  }
+  .gp.v0 { color: var(--accent); background: var(--surface-alt); }
+  .gp.v1 { color: var(--text-dim); }
+  .gp.v3, .gp.v4 { color: var(--bar); font-weight: 700; }
+  .gp.v4 { background: var(--bar-soft); }
+  .gh.gsom, .gp.gsom {
+    font-weight: 700; color: var(--text); background: none;
+    border-left: 1px solid var(--rule);
+  }
+
+  /* bruto houe - die tradisionele kaart se merke: sirkel onder par,
+     blokkie bo par, dubbel vir twee of meer */
+  .gb {
+    text-align: center; padding: 2px 0; font-size: 13px; font-weight: 600;
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    color: var(--text-dim); font-variant-numeric: tabular-nums;
+  }
+  .gb span {
+    display: inline-block; min-width: 17px; line-height: 15px;
+    border: 1.5px solid transparent;
+  }
+  .gb.onder span { border-color: var(--bar); border-radius: 50%; color: var(--bar); }
+  .gb.onder2 span { border-color: var(--bar); border-radius: 50%; color: var(--bar);
+    box-shadow: 0 0 0 1.5px var(--ground), 0 0 0 3px var(--bar); }
+  .gb.bo span { border-color: var(--rule); color: var(--text); }
+  .gb.bo2 span { border-color: var(--accent); color: var(--accent);
+    box-shadow: 0 0 0 1.5px var(--ground), 0 0 0 3px var(--accent); }
+  .gb.gsom { font-weight: 700; color: var(--text); border-left: 1px solid var(--rule); }
+  .gat-tot { font-size: 12px; color: var(--text-dim); }
+  .gat-tot b {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 16px; color: var(--text);
+  }
+  .gat-sleutel { display: block; font-size: 10.5px; margin-top: 2px; }
+  .gat-sleutel i {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    margin: 0 2px 0 6px; vertical-align: middle;
+  }
+  .gat-sleutel i.p3 { background: var(--brass); }
+  .gat-sleutel i.p5 { background: var(--bar); }
+
+  .board tbody .tt-houer { padding: 0; text-align: left; border-bottom: none; }
+  .tt-rondte { padding: 4px 0 14px; }
+  .tt-rondte.vooraf .tt-kop { padding-top: 4px; }
+  .tt-wag {
+    margin: 12px 0 0; font-size: 13px; font-style: italic; color: var(--text-dim);
+  }
+  .tt-kop {
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    padding: 10px 0 5px; border-bottom: 1px solid var(--rule); margin-bottom: 2px;
+  }
+  .tt-kop b {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 17px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+  }
+  .tt-kop span { font-size: 11.5px; color: var(--text-dim); }
+  .tt-bal {
+    display: grid; grid-template-columns: 64px 1fr; gap: 0 12px;
+    padding: 8px 0; border-bottom: 1px dotted var(--rule-soft);
+  }
+  .tt-bal:last-child { border-bottom: none; }
+  .tt-wanneer b {
+    display: block; font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1;
+  }
+  .tt-wanneer span {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--brass); white-space: nowrap;
+  }
+  .tt-spelers { display: flex; flex-direction: column; gap: 1px; }
+  .tt-speler { font-size: 14px; line-height: 1.3; }
+
+  /* ---- 4-bal alliansie onder 'n dagblad --------------------------- */
+  .alli { margin-top: 22px; }
+  .alli-kop {
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    padding: 10px 0 5px; border-bottom: 1px solid var(--rule); margin: 0 0 2px;
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 17px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+  }
+  .alli-kop span {
+    font-family: "Source Sans 3", system-ui, sans-serif;
+    font-size: 11.5px; font-weight: 400; text-transform: none; letter-spacing: 0;
+    color: var(--text-dim);
+  }
+  .alli-bal {
+    display: grid; grid-template-columns: 54px 1fr 52px; gap: 0 12px;
+    align-items: start; padding: 8px 0; border-bottom: 1px dotted var(--rule-soft);
+  }
+  .alli-bal:last-child { border-bottom: none; }
+  .alli-bal.top .alli-pos b { color: var(--accent); }
+  .alli-pos b {
+    display: block; font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums;
+    line-height: 1.1; color: var(--text-dim);
+  }
+  .alli-pos span {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--brass); white-space: nowrap;
+  }
+  .alli-spelers { display: flex; flex-direction: column; gap: 1px; }
+  .alli-speler { font-size: 14px; line-height: 1.3; }
+  .alli-vgee { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+  .alli-punte { text-align: right; }
+  .alli-punte b {
+    display: block; font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1;
+  }
+  .alli-punte span {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim);
+  }
+
+  .board .c-reeks { width: 108px; padding-left: 8px; }
+  .board tbody .c-reeks .strip {
+    display: inline-flex; gap: 1px; font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 14px; font-weight: 600; font-style: normal;
+  }
+  .board tbody .c-reeks i {
+    font-style: normal; min-width: 22px; padding: 1px 3px; text-align: center;
+    background: var(--surface); border: 1px solid var(--rule-soft);
+  }
+  .leader-name.two {
+    white-space: normal; font-size: 18px; line-height: 1.14; letter-spacing: .01em;
+  }
+  .up   { color: var(--bar); }
+  .down { color: var(--accent); }
+  .flat { color: var(--text-dim); opacity: .5; }
+
+  .c-spark svg { display: block; margin-left: auto; }
+  .c-spark rect { fill: var(--bar-soft); }
+  .c-spark rect.hi { fill: var(--bar); }
+
+  /* ---- footer ----------------------------------------------------- */
+  .note {
+    margin-top: 22px; padding: 12px 14px; background: var(--surface);
+    border-left: 2px solid var(--brass); font-size: 13px; color: var(--text-dim);
+  }
+  .note b { color: var(--text); font-weight: 600; }
+  .stamp {
+    margin-top: 14px; font-size: 11px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text-dim); text-align: center;
+  }
+
+  @media (max-width: 359px) {
+    h1 { font-size: 25px; }
+    .board .c-spark { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+/* ===== Nag ===== */
+:root{
+ --ground:#F5F6F4;--surface:#FFFFFF;--surface-alt:#EAEDE9;
+ --text:#10130F;--text-dim:#6E756C;--rule:#E1E5E0;--rule-soft:#EDF0EC;
+ --accent:#00784A;--brass:#A8811F;--bar:#00784A;--bar-soft:#CFE7DA;
+ --chip:transparent;--chip-on:#10130F;--chip-on-txt:#FFFFFF;--merk-op:.05;
+ --rooi:#CE3A22;--geel:#E8A800;--syfer-op:#101010;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+ --ground:#0A0C0B;--surface:#151A16;--surface-alt:#101410;
+ --text:#F1F3F0;--text-dim:#8B948C;--rule:#242C26;--rule-soft:#1A211C;
+ --accent:#00E07A;--brass:#E0B84E;--bar:#00E07A;--bar-soft:#16301F;
+ --chip:transparent;--chip-on:#00E07A;--chip-on-txt:#06120A;--merk-op:.07;
+ --rooi:#E8503A;--geel:#F5C542;--syfer-op:#101010;
+}}
+:root[data-theme="dark"]{
+ --ground:#0A0C0B;--surface:#151A16;--surface-alt:#101410;
+ --text:#F1F3F0;--text-dim:#8B948C;--rule:#242C26;--rule-soft:#1A211C;
+ --accent:#00E07A;--brass:#E0B84E;--bar:#00E07A;--bar-soft:#16301F;
+ --chip:transparent;--chip-on:#00E07A;--chip-on-txt:#06120A;--merk-op:.07;
+ --rooi:#E8503A;--geel:#F5C542;--syfer-op:#101010;
+}
+
+  body{font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:-.011em}
+  .tab,.strap-course,.leader-name,.leader-score,.board tbody .c-pos,.eyebrow,
+  .board tbody .c-punte,.gp,.gh.gsom,.gat-tot b,.tt-wanneer b,.tt-kop b,.alli-kop,
+  .alli-pos b,.alli-punte b,.board tbody .c-reeks .strip,#toerkies,.beker b
+    {font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif}
+  .masthead{background:var(--ground);border-bottom:1px solid var(--rule);padding-top:22px}
+  .eyebrow{font-size:clamp(22px,6.6vw,29px);font-weight:800;letter-spacing:-.03em;
+    text-transform:none;color:var(--text);line-height:1.02;margin:0;
+    white-space:normal;overflow:visible;text-overflow:clip;text-wrap:balance}
+  .eyebrow .toernr{display:block;font-size:12px;font-weight:500;letter-spacing:0;
+    color:var(--text-dim);margin-top:5px}
+  .logo{color:var(--text);width:42px}
+  #toerkies{border-radius:999px;padding:5px 8px;font-weight:600;font-size:13px;
+    letter-spacing:0;background:var(--surface);border-color:var(--rule)}
+  .tabs{gap:7px;padding-bottom:14px}
+  .tab{border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:600;
+    letter-spacing:0;text-transform:none;background:transparent;border-color:var(--rule)}
+  .tab[aria-selected="true"]{background:var(--chip-on);color:var(--chip-on-txt);border-color:transparent}
+  .strap{border-bottom:none;padding:22px 0 4px;align-items:flex-end}
+  .strap-course{font-size:25px;font-weight:700;letter-spacing:-.025em;text-transform:none}
+  .strap-meta{font-size:13px}
+  .strap.solo{justify-content:flex-start}
+  .strap.solo .strap-course{display:none}
+  .strap.solo .strap-meta{text-align:left}
+  .leader{background:var(--surface);border:none;border-radius:16px;padding:16px 18px;
+    margin-top:12px;gap:16px}
+  .leader-flag{width:40px;height:40px;border-radius:12px;background:var(--accent);
+    color:var(--surface);font-size:19px;font-weight:700}
+  .leader-label{font-size:11px;font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--text-dim)}
+  .leader-name{font-size:23px;font-weight:700;letter-spacing:-.025em;text-transform:none}
+  .leader-name.two{font-size:18px}
+  .leader-sub{font-size:12.5px;color:var(--text-dim);margin-top:3px}
+  .leader-score b{font-size:36px;font-weight:800;letter-spacing:-.035em}
+  .leader-score span{font-size:11px;font-weight:500;letter-spacing:0;text-transform:none}
+  .board{margin-top:14px}
+  .board thead th{font-size:11px;font-weight:500;letter-spacing:0;text-transform:none;
+    border-bottom:none;padding:6px 0 10px}
+  .board tbody td{padding:13px 0;border-bottom:1px solid var(--rule-soft)}
+  .board tbody .c-pos{font-size:15px;font-weight:600}
+  .board tbody .c-naam{font-size:15px;font-weight:500}
+  .board tbody .c-naam .idx{font-size:12px;font-weight:400}
+  .board tbody .c-punte{font-size:20px;font-weight:700;letter-spacing:-.02em}
+  .board tbody tr.oopmaak:hover td{background:var(--surface)}
+  .wys{font-size:11px;letter-spacing:0;color:var(--accent)}
+  .gp{border-radius:6px;font-weight:600;font-size:14px;color:var(--text);
+    background:none;border:1.5px solid transparent}
+  .gp.v0{color:var(--text);background:none;border-color:var(--text)}
+  .gp.v1{color:var(--text);background:none;border-color:var(--rooi)}
+  .gp.v2{color:var(--text);background:none;border-color:transparent}
+  .gp.v3{background:var(--rooi);border-color:var(--rooi);color:var(--syfer-op);font-weight:700}
+  .gp.v4{background:var(--geel);border-color:var(--geel);color:var(--syfer-op);font-weight:700}
+  .gh{font-size:10.5px}
+  .gat-ry{gap:3px}
+  .gh.gsom,.gp.gsom{border-left:none;background:var(--surface-alt)}
+  .gb{font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:12.5px;font-weight:500}
+  .gb.onder span,.gb.onder2 span{border-color:var(--bar);color:var(--bar)}
+  .gb.bo span{border-color:var(--rule);color:var(--text)}
+  .gb.bo2 span{border-color:var(--rooi);color:var(--rooi)}
+  .gb.onder2 span{box-shadow:0 0 0 1.5px var(--ground),0 0 0 3px var(--bar)}
+  .gb.bo2 span{box-shadow:0 0 0 1.5px var(--ground),0 0 0 3px var(--rooi)}
+  .gb.gsom{border-left:none;background:var(--surface-alt);color:var(--text)}
+  .board tbody .c-reeks i{border:none;border-radius:6px;background:var(--surface-alt);font-weight:600}
+  .tt-kop,.alli-kop{border-bottom:1px solid var(--rule-soft)}
+  .tt-kop b,.alli-kop{font-size:16px;font-weight:700;letter-spacing:-.02em;text-transform:none}
+  .tt-wanneer b{font-size:16px}
+  .tt-wanneer span,.alli-pos span{font-size:10.5px;letter-spacing:0;text-transform:none;color:var(--text-dim)}
+  .alli-punte b,.alli-pos b{font-weight:700;letter-spacing:-.02em}
+  .note{background:var(--surface);border-left:none;border-radius:14px;padding:15px 17px;font-size:13.5px}
+  .stamp{text-transform:none;letter-spacing:0;font-size:12px}
+  .watermerk{position:fixed;inset:0;margin:auto;width:min(80vw,440px);height:auto;
+    z-index:0;pointer-events:none;color:var(--text);opacity:var(--merk-op)}
+  .wrap{position:relative;z-index:1}
+  .board .c-spark{width:auto;padding-left:8px}
+  .board thead th.c-spark{white-space:normal;line-height:1.15;max-width:108px}
+  .board tbody .c-spark .strip{display:inline-flex;gap:2px}
+  .board tbody .c-spark i{font-style:normal;min-width:19px;padding:2px 3px;
+    text-align:center;font-size:12px;font-weight:600;border-radius:5px;
+    background:var(--surface-alt);color:var(--text-dim);
+    font-variant-numeric:tabular-nums}
+
+</style>
+
+<svg class="watermerk" aria-hidden="true" viewBox="0 0 828 744" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0.000000,744.000000) scale(0.100000,-0.100000)" fill="currentColor"><path d="M4665 7429 c-16 -5 -70 -13 -120 -19 -225 -24 -286 -32 -380 -46 -153 -23 -272 -52 -344 -83 -36 -15 -81 -34 -98 -41 -18 -7 -33 -16 -33 -21 0 -12 115 -11 165 1 66 16 341 40 457 40 79 0 117 -4 139 -15 16 -9 34 -13 40 -9 29 18 92 22 184 13 111 -11 411 -64 452 -80 15 -6 57 -19 93 -29 67 -19 214 -72 308 -109 90 -36 272 -130 403 -209 678 -404 1190 -1056 1466 -1867 84 -248 149 -580 173 -879 23 -300 2 -699 -50 -921 -10 -44 -33 -145 -50 -225 -17 -80 -42 -172 -55 -205 -13 -33 -29 -82 -35 -109 -10 -45 -102 -269 -134 -326 -8 -14 -55 -106 -104 -205 -131 -265 -255 -443 -461 -668 -92 -100 -215 -226 -272 -280 -410 -380 -958 -651 -1519 -749 -157 -27 -203 -31 -440 -35 -301 -6 -472 8 -700 56 -152 32 -469 132 -605 191 -95 41 -145 52 -152 34 -17 -50 494 -314 775 -400 428 -130 553 -149 1002 -149 343 0 410 5 605 46 626 130 1179 418 1627 847 315 302 521 574 739 979 65 120 181 401 238 578 76 236 111 390 152 665 28 189 33 247 37 479 5 286 -1 362 -48 678 -36 235 -71 381 -150 627 -163 503 -418 941 -780 1341 -126 139 -157 169 -305 296 -402 345 -895 601 -1375 713 -94 22 -159 32 -450 67 -47 6 -115 17 -152 25 -74 15 -196 17 -243 3z M4448 7198 c-52 -14 -69 -37 -75 -107 -5 -52 -3 -61 10 -61 11 0 20 15 28 44 12 47 50 93 68 81 7 -3 29 -30 51 -59 54 -74 126 -125 186 -132 46 -6 94 -27 157 -68 27 -18 27 -18 27 7 0 14 -15 42 -37 66 -35 39 -44 43 -106 52 -80 11 -100 23 -147 85 -80 107 -89 112 -162 92z M2817 6932 c-15 -23 289 -292 330 -292 21 0 15 60 -10 105 -27 48 -124 129 -192 160 -59 28 -120 41 -128 27z M4350 6901 c0 -5 -22 -32 -50 -61 -27 -29 -50 -56 -50 -59 0 -4 14 -20 30 -36 19 -18 37 -51 46 -82 9 -29 19 -53 24 -53 27 0 55 231 34 284 -6 17 -34 22 -34 7z M4895 6814 c-21 -52 -20 -56 31 -131 46 -67 111 -191 133 -254 6 -18 14 -30 17 -27 3 3 10 36 15 73 15 111 -22 217 -115 323 -49 55 -63 58 -81 16z M4631 6787 c-6 -6 -11 -19 -11 -30 0 -10 -13 -32 -29 -48 -22 -22 -39 -29 -68 -29 -21 0 -44 -4 -51 -9 -16 -9 -31 -70 -32 -122 0 -19 -6 -44 -14 -54 -12 -17 -17 -18 -40 -7 -25 11 -30 9 -62 -25 -44 -48 -66 -88 -62 -116 2 -14 32 -38 96 -77 125 -75 154 -105 159 -167 6 -60 -10 -123 -41 -160 -35 -42 -47 -70 -58 -132 -16 -92 -15 -136 2 -136 8 0 20 17 27 38 7 21 24 53 37 70 49 64 66 116 66 207 0 93 7 114 36 108 25 -4 84 -142 91 -212 8 -79 -3 -123 -43 -162 -39 -39 -39 -42 -20 -89 40 -94 126 -55 199 90 36 72 84 214 109 319 31 133 31 315 -1 413 -32 102 -81 178 -159 251 -80 76 -114 96 -131 79z M4133 6758 c-13 -6 -23 -14 -23 -19 0 -12 53 6 58 19 4 14 -5 14 -35 0z M5645 6725 c22 -19 76 -56 120 -82 44 -26 93 -57 108 -70 29 -24 57 -30 57 -14 0 17 -167 141 -230 172 -84 40 -106 38 -55 -6z M2375 6672 c-10 -48 13 -163 48 -232 37 -74 106 -149 193 -208 34 -22 93 -72 132 -110 95 -91 123 -152 129 -276 5 -101 45 -243 71 -253 29 -12 58 40 85 154 34 140 34 151 0 159 -69 15 -72 23 -38 108 14 36 23 70 20 76 -3 5 -24 10 -46 10 -35 0 -48 7 -107 63 -37 34 -103 82 -147 106 -44 24 -97 61 -117 82 -36 38 -88 135 -134 253 -38 94 -76 124 -89 68z M3131 6541 c-21 -38 -13 -72 25 -107 71 -68 95 -34 46 66 -29 59 -54 73 -71 41z M3684 6416 c-65 -66 -69 -86 -16 -86 20 0 55 5 77 11 22 6 99 14 172 17 143 8 171 18 140 50 -15 14 -34 17 -128 14 -106 -2 -110 -2 -133 23 -13 14 -31 25 -40 25 -10 0 -42 -24 -72 -54z M6026 6348 c-9 -12 -16 -33 -16 -46 0 -79 181 -278 285 -312 43 -14 75 2 100 50 17 32 24 32 63 -3 27 -25 28 -51 2 -84 -28 -36 -25 -58 20 -134 64 -107 126 -151 183 -130 36 14 52 6 72 -36 21 -44 10 -58 -46 -54 -59 4 -79 -18 -79 -85 0 -107 134 -314 230 -354 26 -11 35 -9 72 10 40 21 43 21 55 4 32 -43 90 -284 69 -284 -3 0 -30 14 -59 30 -65 37 -77 37 -116 4 -49 -41 -56 -85 -36 -246 10 -77 15 -141 13 -144 -3 -2 -24 20 -47 50 -56 72 -123 134 -156 142 -34 8 -91 -1 -121 -20 -13 -9 -35 -37 -51 -63 -23 -40 -28 -61 -31 -139 -9 -211 106 -397 264 -427 28 -5 36 -1 78 49 66 76 78 119 74 259 -3 120 4 139 35 93 8 -13 40 -51 71 -86 31 -34 56 -70 56 -80 0 -9 -16 -37 -35 -61 -34 -42 -65 -122 -65 -165 0 -12 -5 -38 -11 -58 -13 -47 -31 -49 -97 -7 -28 17 -58 29 -68 27 -10 -2 -31 -27 -46 -57 -49 -94 -33 -213 41 -301 23 -27 41 -57 41 -67 0 -10 -20 -46 -44 -81 -61 -86 -79 -161 -75 -293 4 -88 9 -113 31 -160 40 -80 66 -101 139 -110 34 -4 65 -13 70 -21 13 -20 11 -75 -6 -114 -16 -39 -17 -39 -110 -15 -82 21 -182 -53 -248 -186 -19 -37 -40 -86 -47 -108 -20 -63 -26 -64 -80 -3 -58 65 -94 82 -155 76 -149 -17 -304 -184 -336 -363 -19 -104 20 -187 106 -226 54 -25 77 -24 167 8 42 15 80 24 84 20 4 -4 -9 -56 -30 -117 -23 -68 -34 -118 -31 -133 11 -41 76 -96 131 -110 28 -7 50 -18 51 -27 2 -8 -11 -39 -28 -68 l-31 -54 -41 6 c-23 4 -77 9 -119 12 -89 7 -93 14 -58 82 11 21 26 64 32 95 10 49 10 60 -7 97 -35 78 -104 109 -203 90 -157 -29 -320 -179 -338 -312 -6 -40 -2 -54 21 -93 36 -62 85 -84 183 -85 66 0 72 -2 72 -20 0 -11 -13 -47 -30 -80 -17 -34 -30 -75 -30 -97 0 -63 -19 -88 -65 -88 l-40 0 -1 75 c-1 82 -15 115 -62 146 -34 23 -164 31 -228 15 -64 -16 -158 -64 -221 -113 -61 -47 -75 -45 -118 15 -40 55 -84 83 -152 97 -137 29 -304 -38 -373 -148 -24 -39 -30 -58 -30 -108 l0 -60 55 -48 c30 -26 55 -53 55 -61 0 -22 -36 -36 -83 -33 -41 3 -42 4 -45 43 -4 71 -10 82 -55 103 -42 20 -90 27 -155 24 -48 -3 -94 -51 -90 -94 4 -42 46 -71 128 -88 34 -7 64 -19 67 -26 2 -7 -8 -31 -23 -54 -46 -69 -29 -152 34 -166 140 -31 157 -46 123 -110 -30 -56 -18 -64 98 -64 108 0 233 14 334 36 51 12 79 25 112 54 59 51 71 54 140 30 l58 -20 76 21 c93 25 205 79 209 99 1 9 -10 20 -28 27 -36 13 -37 26 -7 108 20 54 25 60 53 63 45 4 66 -19 52 -61 -30 -95 -22 -100 100 -62 146 46 231 95 340 199 48 46 54 78 22 119 -35 44 -25 60 73 126 54 37 77 35 77 -7 0 -36 16 -52 54 -52 92 0 406 281 406 363 0 15 -13 41 -31 61 -32 37 -31 56 2 56 65 0 206 126 274 245 22 38 60 94 83 123 24 30 50 68 57 85 7 18 22 43 33 57 26 34 61 103 88 175 12 33 28 74 35 91 11 28 10 38 -9 81 -30 70 -20 101 40 130 59 29 83 68 109 180 12 48 30 115 40 148 11 33 23 89 26 125 4 56 2 69 -16 92 -14 17 -33 28 -54 30 -30 3 -32 6 -35 47 -4 54 5 64 46 49 28 -11 34 -10 57 12 38 35 46 85 48 276 2 160 1 174 -19 200 -13 19 -37 32 -69 40 -34 9 -56 23 -77 48 -16 20 -36 36 -44 36 -8 0 -26 11 -39 25 -19 18 -25 35 -25 69 0 25 5 48 10 51 6 4 31 -12 55 -34 48 -44 56 -47 87 -30 51 27 62 156 29 326 -25 129 -57 210 -97 251 -41 41 -66 41 -101 -3 -15 -19 -33 -35 -39 -35 -9 0 -64 179 -64 209 0 20 27 12 66 -19 69 -56 121 -22 109 70 -9 63 -71 243 -112 322 -66 128 -104 154 -190 133 -31 -7 -34 -5 -48 28 -8 20 -15 52 -15 70 0 29 5 37 30 47 61 25 62 71 2 180 -81 150 -143 207 -211 195 -35 -6 -41 -3 -66 27 -15 18 -34 47 -43 64 -14 31 -14 34 11 64 15 17 27 40 27 50 0 45 -181 242 -248 269 -29 12 -38 11 -73 -4 -39 -18 -40 -18 -67 3 -82 66 -134 103 -157 112 -42 16 -73 12 -89 -12z m1163 -2005 c15 -57 8 -123 -13 -123 -7 0 -32 20 -55 45 -45 49 -45 61 -2 108 35 39 53 31 70 -30z m-204 -637 c60 -73 120 -81 174 -22 33 36 49 33 96 -17 22 -23 51 -50 65 -59 22 -13 25 -23 24 -67 -1 -70 -12 -78 -59 -41 -65 52 -107 36 -154 -57 -32 -63 -51 -149 -51 -226 0 -76 -11 -107 -40 -107 -33 0 -42 33 -29 101 15 74 6 205 -17 274 -12 34 -34 65 -71 100 -59 57 -65 80 -33 133 27 44 52 41 95 -12z m266 -767 c15 -29 2 -106 -22 -130 -16 -16 -27 -18 -62 -13 -76 12 -87 20 -87 59 0 20 7 51 14 70 15 35 15 35 80 35 56 0 67 -3 77 -21z m-274 -245 c3 -9 -2 -31 -11 -51 -12 -26 -22 -34 -39 -31 -26 4 -35 45 -17 78 13 24 58 27 67 4z m-101 -321 c3 -16 12 -52 20 -81 8 -29 12 -62 9 -73 -9 -27 -154 -151 -173 -147 -21 4 -96 134 -88 153 3 8 24 26 48 41 24 15 65 51 91 80 55 61 83 69 93 27z m-380 -41 c55 -67 68 -91 55 -106 -12 -14 -158 -76 -179 -76 -8 0 -4 20 10 58 34 93 66 162 75 162 4 0 22 -17 39 -38z m-121 -906 c0 -20 -9 -35 -28 -49 -39 -30 -53 -12 -31 42 13 33 21 41 38 39 16 -2 21 -10 21 -32z m-447 -321 c20 -20 -40 -54 -73 -41 -18 7 -20 42 -2 50 12 5 67 -1 75 -9z m-804 -42 c18 -16 54 -43 79 -60 26 -18 47 -37 47 -43 0 -6 -30 -25 -67 -42 -38 -18 -93 -47 -123 -65 -30 -18 -62 -33 -70 -33 -22 0 -150 98 -150 115 0 7 37 31 83 53 45 22 95 54 111 71 36 38 50 39 90 4z m403 -69 c7 -20 -8 -48 -29 -52 -8 -2 -25 6 -39 16 -20 17 -21 22 -10 36 18 21 70 21 78 0z M156 6330 c-27 -32 -42 -103 -32 -145 7 -29 73 -62 89 -46 10 10 36 129 37 168 0 26 -25 53 -50 53 -10 0 -30 -14 -44 -30z M5061 6323 c-21 -47 -25 -117 -8 -167 11 -30 13 -55 8 -74 -11 -37 -55 -106 -100 -158 -20 -23 -49 -74 -65 -115 -35 -90 -30 -106 38 -101 56 5 65 -10 47 -77 -11 -40 -10 -47 5 -58 10 -7 30 -13 46 -13 19 0 34 -9 50 -30 26 -36 30 -36 88 -8 25 11 52 24 60 28 26 12 22 63 -10 134 -16 37 -30 74 -30 83 0 8 -12 40 -26 70 -14 31 -30 81 -35 111 -6 30 -15 66 -21 81 -6 14 -12 85 -13 156 0 72 -6 138 -11 148 -9 16 -11 15 -23 -10z M3405 6271 c-7 -13 17 -24 40 -19 9 1 16 8 16 13 0 14 -48 19 -56 6z M82 6086 c-11 -25 -45 -249 -57 -381 -6 -67 22 -456 46 -640 63 -485 273 -1154 502 -1600 160 -310 322 -544 599 -865 112 -129 144 -188 154 -280 3 -36 14 -93 24 -127 16 -52 18 -90 16 -265 -3 -180 -6 -210 -26 -263 -23 -63 -22 -125 4 -160 19 -26 33 -12 40 38 4 27 26 74 57 123 46 72 50 82 43 119 -4 22 -9 76 -10 120 -9 218 -11 243 -28 266 -37 53 1 129 74 149 34 9 46 8 81 -10 25 -13 51 -19 64 -16 39 10 84 55 96 96 16 53 41 73 123 99 135 43 233 106 413 264 142 125 161 156 178 296 6 52 38 128 76 183 36 50 26 87 -41 156 -34 34 -77 69 -97 77 -21 9 -58 39 -84 68 -36 40 -50 49 -59 40 -14 -13 -8 -35 40 -163 37 -99 54 -219 41 -300 -13 -79 -51 -162 -86 -186 -15 -11 -50 -38 -80 -61 -29 -22 -65 -48 -81 -56 -16 -9 -55 -36 -87 -61 -100 -78 -148 -82 -312 -26 -55 19 -109 30 -142 30 -30 0 -67 7 -82 15 -16 8 -73 62 -127 121 -55 58 -119 118 -144 132 -67 37 -113 85 -204 207 -241 323 -440 689 -584 1075 -171 458 -228 760 -277 1475 -19 271 -25 327 -41 332 -6 2 -16 -8 -22 -21z M340 5496 c0 -32 36 -161 60 -211 16 -35 30 -67 30 -71 0 -4 18 -44 40 -89 37 -78 64 -125 107 -185 10 -14 26 -41 36 -60 9 -19 29 -51 45 -71 15 -20 47 -62 71 -94 210 -277 597 -635 688 -635 32 0 20 23 -30 56 -64 42 -311 252 -407 346 -129 125 -286 312 -323 385 -9 16 -23 35 -31 42 -24 20 -128 242 -181 386 -41 109 -79 190 -95 200 -5 3 -10 4 -10 1z M6405 5396 c-39 -17 -62 -52 -76 -114 -30 -127 106 -388 235 -454 79 -41 143 -21 183 57 31 59 -9 261 -68 348 -87 127 -202 195 -274 163z M1819 4944 c-19 -23 -26 -158 -8 -152 19 6 38 64 38 121 1 49 -7 58 -30 31z M2877 4821 c-10 -46 -68 -81 -137 -81 -76 0 -84 -11 -54 -68 13 -25 24 -56 24 -69 0 -13 5 -34 12 -46 19 -37 110 -137 124 -137 23 0 34 36 34 109 0 60 3 72 20 81 19 10 20 18 15 93 -8 108 -14 147 -24 147 -5 0 -11 -13 -14 -29z M1802 4429 c5 -103 11 -136 33 -194 21 -54 28 -89 29 -152 1 -73 -1 -84 -23 -107 -37 -39 -15 -54 37 -27 57 29 75 27 144 -20 76 -52 117 -64 240 -74 94 -7 138 1 138 25 0 5 -18 21 -39 36 -33 21 -46 24 -83 19 -41 -6 -45 -4 -100 47 -58 54 -132 172 -200 321 -17 37 -34 67 -38 67 -4 0 -15 -12 -25 -26 -23 -36 -33 -21 -44 64 -9 73 -34 131 -60 140 -12 4 -13 -16 -9 -119z M2990 4507 c1 -25 26 -137 33 -144 12 -11 45 19 50 44 9 47 -21 100 -65 116 -14 5 -18 1 -18 -16z M2743 4158 c-10 -12 -33 -82 -33 -100 0 -19 30 -5 55 23 17 21 25 41 23 58 -3 28 -29 39 -45 19z M2538 3997 c-13 -14 -32 -42 -42 -62 -23 -43 -12 -57 39 -48 42 8 65 21 103 56 35 34 42 67 15 67 -10 0 -35 3 -55 6 -31 5 -40 2 -60 -19z M4538 3809 c-22 -12 -23 -38 -3 -45 20 -8 45 13 45 37 0 21 -16 24 -42 8z M3665 3567 c-46 -21 -97 -84 -93 -114 5 -41 28 -49 92 -33 49 11 59 11 71 -1 12 -11 13 -22 4 -52 -17 -62 18 -85 80 -53 40 21 101 93 101 119 -1 12 -24 48 -54 81 -52 58 -54 60 -112 63 -36 2 -71 -2 -89 -10z M5087 3546 c-26 -17 -50 -41 -53 -53 -3 -12 2 -74 11 -138 14 -97 15 -131 5 -208 -15 -122 -44 -242 -86 -351 -50 -129 -45 -144 33 -111 109 46 191 -7 374 -242 86 -111 154 -176 198 -191 54 -19 56 -1 7 99 -97 201 -80 396 51 587 49 70 39 80 -57 58 -138 -31 -211 -17 -283 52 -82 79 -117 183 -126 369 -3 78 -11 146 -16 152 -6 5 -28 -3 -58 -23z M4764 2494 c-51 -39 -337 -325 -385 -385 -16 -20 -29 -42 -29 -48 0 -45 352 277 428 391 25 37 43 71 40 74 -3 2 -27 -12 -54 -32z M2155 1897 c-84 -38 -138 -165 -104 -241 15 -32 29 -37 74 -25 21 6 59 8 86 4 78 -11 122 2 195 56 49 36 76 49 101 49 39 0 51 19 35 55 -17 36 -52 55 -154 81 -125 31 -195 38 -233 21z M3062 1780 c-46 -23 -82 -55 -153 -133 l-93 -102 37 -3 c65 -6 123 31 275 170 36 33 42 72 13 87 -14 8 -32 4 -79 -19z M2739 1759 c-12 -17 -29 -55 -38 -85 -13 -40 -26 -59 -51 -77 -31 -20 -35 -28 -32 -60 1 -20 -4 -49 -12 -64 -30 -56 -246 -237 -380 -317 -66 -40 -56 -39 -208 -18 -46 6 -65 15 -92 41 -32 31 -37 33 -67 22 -44 -15 -44 -15 -89 25 -42 38 -52 40 -141 29 -42 -6 -69 -3 -103 8 -25 9 -46 12 -46 8 0 -18 60 -62 110 -80 76 -27 172 -67 255 -106 83 -39 179 -72 233 -81 30 -5 54 0 108 23 38 17 91 38 118 48 28 10 74 40 105 69 31 28 78 69 104 90 27 22 71 74 97 115 27 42 67 94 89 116 43 41 50 65 26 85 -21 18 -18 54 6 76 45 40 79 164 45 164 -8 0 -25 -14 -37 -31z M3221 1428 c-129 -127 -172 -162 -251 -207 -74 -42 -105 -54 -141 -56 -26 0 -58 -9 -72 -18 -51 -33 -87 -13 -87 47 0 14 -5 26 -11 26 -13 0 -149 -129 -149 -142 0 -42 111 -66 225 -48 107 17 183 61 338 192 37 32 85 67 108 78 22 12 64 36 92 54 29 18 84 49 122 69 39 19 79 45 90 57 l20 22 -45 39 c-25 21 -53 39 -64 39 -11 0 -84 -64 -175 -152z M3285 1069 c-33 -20 -36 -31 -30 -95 6 -60 6 -61 -23 -73 -17 -7 -46 -30 -65 -52 -20 -21 -40 -39 -46 -39 -6 0 -34 9 -63 20 -108 41 -193 36 -168 -10 19 -35 222 -135 309 -151 32 -7 55 -5 90 8 43 15 50 15 104 -1 38 -11 73 -30 100 -55 55 -50 73 -59 186 -89 83 -23 117 -26 256 -27 100 -1 177 -6 205 -14 25 -7 80 -14 122 -15 94 -1 131 19 136 77 4 51 -21 107 -50 108 -13 0 -61 10 -108 22 -97 25 -108 41 -71 101 28 44 27 105 0 140 -29 36 -127 85 -208 102 -133 28 -245 14 -332 -41 l-53 -33 -42 37 c-64 60 -206 105 -249 80z m305 -198 c12 -24 13 -51 1 -51 -5 0 -19 8 -32 19 -20 16 -21 21 -10 35 18 21 28 20 41 -3z m235 -145 c29 -19 32 -53 10 -96 -28 -54 -79 -60 -103 -12 -13 25 -24 117 -15 126 12 12 80 0 108 -18z"/></g></svg>
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 828 744" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Laeveld Gholftoer"><g transform="translate(0.000000,744.000000) scale(0.100000,-0.100000)" fill="currentColor"><path d="M4665 7429 c-16 -5 -70 -13 -120 -19 -225 -24 -286 -32 -380 -46 -153 -23 -272 -52 -344 -83 -36 -15 -81 -34 -98 -41 -18 -7 -33 -16 -33 -21 0 -12 115 -11 165 1 66 16 341 40 457 40 79 0 117 -4 139 -15 16 -9 34 -13 40 -9 29 18 92 22 184 13 111 -11 411 -64 452 -80 15 -6 57 -19 93 -29 67 -19 214 -72 308 -109 90 -36 272 -130 403 -209 678 -404 1190 -1056 1466 -1867 84 -248 149 -580 173 -879 23 -300 2 -699 -50 -921 -10 -44 -33 -145 -50 -225 -17 -80 -42 -172 -55 -205 -13 -33 -29 -82 -35 -109 -10 -45 -102 -269 -134 -326 -8 -14 -55 -106 -104 -205 -131 -265 -255 -443 -461 -668 -92 -100 -215 -226 -272 -280 -410 -380 -958 -651 -1519 -749 -157 -27 -203 -31 -440 -35 -301 -6 -472 8 -700 56 -152 32 -469 132 -605 191 -95 41 -145 52 -152 34 -17 -50 494 -314 775 -400 428 -130 553 -149 1002 -149 343 0 410 5 605 46 626 130 1179 418 1627 847 315 302 521 574 739 979 65 120 181 401 238 578 76 236 111 390 152 665 28 189 33 247 37 479 5 286 -1 362 -48 678 -36 235 -71 381 -150 627 -163 503 -418 941 -780 1341 -126 139 -157 169 -305 296 -402 345 -895 601 -1375 713 -94 22 -159 32 -450 67 -47 6 -115 17 -152 25 -74 15 -196 17 -243 3z M4448 7198 c-52 -14 -69 -37 -75 -107 -5 -52 -3 -61 10 -61 11 0 20 15 28 44 12 47 50 93 68 81 7 -3 29 -30 51 -59 54 -74 126 -125 186 -132 46 -6 94 -27 157 -68 27 -18 27 -18 27 7 0 14 -15 42 -37 66 -35 39 -44 43 -106 52 -80 11 -100 23 -147 85 -80 107 -89 112 -162 92z M2817 6932 c-15 -23 289 -292 330 -292 21 0 15 60 -10 105 -27 48 -124 129 -192 160 -59 28 -120 41 -128 27z M4350 6901 c0 -5 -22 -32 -50 -61 -27 -29 -50 -56 -50 -59 0 -4 14 -20 30 -36 19 -18 37 -51 46 -82 9 -29 19 -53 24 -53 27 0 55 231 34 284 -6 17 -34 22 -34 7z M4895 6814 c-21 -52 -20 -56 31 -131 46 -67 111 -191 133 -254 6 -18 14 -30 17 -27 3 3 10 36 15 73 15 111 -22 217 -115 323 -49 55 -63 58 -81 16z M4631 6787 c-6 -6 -11 -19 -11 -30 0 -10 -13 -32 -29 -48 -22 -22 -39 -29 -68 -29 -21 0 -44 -4 -51 -9 -16 -9 -31 -70 -32 -122 0 -19 -6 -44 -14 -54 -12 -17 -17 -18 -40 -7 -25 11 -30 9 -62 -25 -44 -48 -66 -88 -62 -116 2 -14 32 -38 96 -77 125 -75 154 -105 159 -167 6 -60 -10 -123 -41 -160 -35 -42 -47 -70 -58 -132 -16 -92 -15 -136 2 -136 8 0 20 17 27 38 7 21 24 53 37 70 49 64 66 116 66 207 0 93 7 114 36 108 25 -4 84 -142 91 -212 8 -79 -3 -123 -43 -162 -39 -39 -39 -42 -20 -89 40 -94 126 -55 199 90 36 72 84 214 109 319 31 133 31 315 -1 413 -32 102 -81 178 -159 251 -80 76 -114 96 -131 79z M4133 6758 c-13 -6 -23 -14 -23 -19 0 -12 53 6 58 19 4 14 -5 14 -35 0z M5645 6725 c22 -19 76 -56 120 -82 44 -26 93 -57 108 -70 29 -24 57 -30 57 -14 0 17 -167 141 -230 172 -84 40 -106 38 -55 -6z M2375 6672 c-10 -48 13 -163 48 -232 37 -74 106 -149 193 -208 34 -22 93 -72 132 -110 95 -91 123 -152 129 -276 5 -101 45 -243 71 -253 29 -12 58 40 85 154 34 140 34 151 0 159 -69 15 -72 23 -38 108 14 36 23 70 20 76 -3 5 -24 10 -46 10 -35 0 -48 7 -107 63 -37 34 -103 82 -147 106 -44 24 -97 61 -117 82 -36 38 -88 135 -134 253 -38 94 -76 124 -89 68z M3131 6541 c-21 -38 -13 -72 25 -107 71 -68 95 -34 46 66 -29 59 -54 73 -71 41z M3684 6416 c-65 -66 -69 -86 -16 -86 20 0 55 5 77 11 22 6 99 14 172 17 143 8 171 18 140 50 -15 14 -34 17 -128 14 -106 -2 -110 -2 -133 23 -13 14 -31 25 -40 25 -10 0 -42 -24 -72 -54z M6026 6348 c-9 -12 -16 -33 -16 -46 0 -79 181 -278 285 -312 43 -14 75 2 100 50 17 32 24 32 63 -3 27 -25 28 -51 2 -84 -28 -36 -25 -58 20 -134 64 -107 126 -151 183 -130 36 14 52 6 72 -36 21 -44 10 -58 -46 -54 -59 4 -79 -18 -79 -85 0 -107 134 -314 230 -354 26 -11 35 -9 72 10 40 21 43 21 55 4 32 -43 90 -284 69 -284 -3 0 -30 14 -59 30 -65 37 -77 37 -116 4 -49 -41 -56 -85 -36 -246 10 -77 15 -141 13 -144 -3 -2 -24 20 -47 50 -56 72 -123 134 -156 142 -34 8 -91 -1 -121 -20 -13 -9 -35 -37 -51 -63 -23 -40 -28 -61 -31 -139 -9 -211 106 -397 264 -427 28 -5 36 -1 78 49 66 76 78 119 74 259 -3 120 4 139 35 93 8 -13 40 -51 71 -86 31 -34 56 -70 56 -80 0 -9 -16 -37 -35 -61 -34 -42 -65 -122 -65 -165 0 -12 -5 -38 -11 -58 -13 -47 -31 -49 -97 -7 -28 17 -58 29 -68 27 -10 -2 -31 -27 -46 -57 -49 -94 -33 -213 41 -301 23 -27 41 -57 41 -67 0 -10 -20 -46 -44 -81 -61 -86 -79 -161 -75 -293 4 -88 9 -113 31 -160 40 -80 66 -101 139 -110 34 -4 65 -13 70 -21 13 -20 11 -75 -6 -114 -16 -39 -17 -39 -110 -15 -82 21 -182 -53 -248 -186 -19 -37 -40 -86 -47 -108 -20 -63 -26 -64 -80 -3 -58 65 -94 82 -155 76 -149 -17 -304 -184 -336 -363 -19 -104 20 -187 106 -226 54 -25 77 -24 167 8 42 15 80 24 84 20 4 -4 -9 -56 -30 -117 -23 -68 -34 -118 -31 -133 11 -41 76 -96 131 -110 28 -7 50 -18 51 -27 2 -8 -11 -39 -28 -68 l-31 -54 -41 6 c-23 4 -77 9 -119 12 -89 7 -93 14 -58 82 11 21 26 64 32 95 10 49 10 60 -7 97 -35 78 -104 109 -203 90 -157 -29 -320 -179 -338 -312 -6 -40 -2 -54 21 -93 36 -62 85 -84 183 -85 66 0 72 -2 72 -20 0 -11 -13 -47 -30 -80 -17 -34 -30 -75 -30 -97 0 -63 -19 -88 -65 -88 l-40 0 -1 75 c-1 82 -15 115 -62 146 -34 23 -164 31 -228 15 -64 -16 -158 -64 -221 -113 -61 -47 -75 -45 -118 15 -40 55 -84 83 -152 97 -137 29 -304 -38 -373 -148 -24 -39 -30 -58 -30 -108 l0 -60 55 -48 c30 -26 55 -53 55 -61 0 -22 -36 -36 -83 -33 -41 3 -42 4 -45 43 -4 71 -10 82 -55 103 -42 20 -90 27 -155 24 -48 -3 -94 -51 -90 -94 4 -42 46 -71 128 -88 34 -7 64 -19 67 -26 2 -7 -8 -31 -23 -54 -46 -69 -29 -152 34 -166 140 -31 157 -46 123 -110 -30 -56 -18 -64 98 -64 108 0 233 14 334 36 51 12 79 25 112 54 59 51 71 54 140 30 l58 -20 76 21 c93 25 205 79 209 99 1 9 -10 20 -28 27 -36 13 -37 26 -7 108 20 54 25 60 53 63 45 4 66 -19 52 -61 -30 -95 -22 -100 100 -62 146 46 231 95 340 199 48 46 54 78 22 119 -35 44 -25 60 73 126 54 37 77 35 77 -7 0 -36 16 -52 54 -52 92 0 406 281 406 363 0 15 -13 41 -31 61 -32 37 -31 56 2 56 65 0 206 126 274 245 22 38 60 94 83 123 24 30 50 68 57 85 7 18 22 43 33 57 26 34 61 103 88 175 12 33 28 74 35 91 11 28 10 38 -9 81 -30 70 -20 101 40 130 59 29 83 68 109 180 12 48 30 115 40 148 11 33 23 89 26 125 4 56 2 69 -16 92 -14 17 -33 28 -54 30 -30 3 -32 6 -35 47 -4 54 5 64 46 49 28 -11 34 -10 57 12 38 35 46 85 48 276 2 160 1 174 -19 200 -13 19 -37 32 -69 40 -34 9 -56 23 -77 48 -16 20 -36 36 -44 36 -8 0 -26 11 -39 25 -19 18 -25 35 -25 69 0 25 5 48 10 51 6 4 31 -12 55 -34 48 -44 56 -47 87 -30 51 27 62 156 29 326 -25 129 -57 210 -97 251 -41 41 -66 41 -101 -3 -15 -19 -33 -35 -39 -35 -9 0 -64 179 -64 209 0 20 27 12 66 -19 69 -56 121 -22 109 70 -9 63 -71 243 -112 322 -66 128 -104 154 -190 133 -31 -7 -34 -5 -48 28 -8 20 -15 52 -15 70 0 29 5 37 30 47 61 25 62 71 2 180 -81 150 -143 207 -211 195 -35 -6 -41 -3 -66 27 -15 18 -34 47 -43 64 -14 31 -14 34 11 64 15 17 27 40 27 50 0 45 -181 242 -248 269 -29 12 -38 11 -73 -4 -39 -18 -40 -18 -67 3 -82 66 -134 103 -157 112 -42 16 -73 12 -89 -12z m1163 -2005 c15 -57 8 -123 -13 -123 -7 0 -32 20 -55 45 -45 49 -45 61 -2 108 35 39 53 31 70 -30z m-204 -637 c60 -73 120 -81 174 -22 33 36 49 33 96 -17 22 -23 51 -50 65 -59 22 -13 25 -23 24 -67 -1 -70 -12 -78 -59 -41 -65 52 -107 36 -154 -57 -32 -63 -51 -149 -51 -226 0 -76 -11 -107 -40 -107 -33 0 -42 33 -29 101 15 74 6 205 -17 274 -12 34 -34 65 -71 100 -59 57 -65 80 -33 133 27 44 52 41 95 -12z m266 -767 c15 -29 2 -106 -22 -130 -16 -16 -27 -18 -62 -13 -76 12 -87 20 -87 59 0 20 7 51 14 70 15 35 15 35 80 35 56 0 67 -3 77 -21z m-274 -245 c3 -9 -2 -31 -11 -51 -12 -26 -22 -34 -39 -31 -26 4 -35 45 -17 78 13 24 58 27 67 4z m-101 -321 c3 -16 12 -52 20 -81 8 -29 12 -62 9 -73 -9 -27 -154 -151 -173 -147 -21 4 -96 134 -88 153 3 8 24 26 48 41 24 15 65 51 91 80 55 61 83 69 93 27z m-380 -41 c55 -67 68 -91 55 -106 -12 -14 -158 -76 -179 -76 -8 0 -4 20 10 58 34 93 66 162 75 162 4 0 22 -17 39 -38z m-121 -906 c0 -20 -9 -35 -28 -49 -39 -30 -53 -12 -31 42 13 33 21 41 38 39 16 -2 21 -10 21 -32z m-447 -321 c20 -20 -40 -54 -73 -41 -18 7 -20 42 -2 50 12 5 67 -1 75 -9z m-804 -42 c18 -16 54 -43 79 -60 26 -18 47 -37 47 -43 0 -6 -30 -25 -67 -42 -38 -18 -93 -47 -123 -65 -30 -18 -62 -33 -70 -33 -22 0 -150 98 -150 115 0 7 37 31 83 53 45 22 95 54 111 71 36 38 50 39 90 4z m403 -69 c7 -20 -8 -48 -29 -52 -8 -2 -25 6 -39 16 -20 17 -21 22 -10 36 18 21 70 21 78 0z M156 6330 c-27 -32 -42 -103 -32 -145 7 -29 73 -62 89 -46 10 10 36 129 37 168 0 26 -25 53 -50 53 -10 0 -30 -14 -44 -30z M5061 6323 c-21 -47 -25 -117 -8 -167 11 -30 13 -55 8 -74 -11 -37 -55 -106 -100 -158 -20 -23 -49 -74 -65 -115 -35 -90 -30 -106 38 -101 56 5 65 -10 47 -77 -11 -40 -10 -47 5 -58 10 -7 30 -13 46 -13 19 0 34 -9 50 -30 26 -36 30 -36 88 -8 25 11 52 24 60 28 26 12 22 63 -10 134 -16 37 -30 74 -30 83 0 8 -12 40 -26 70 -14 31 -30 81 -35 111 -6 30 -15 66 -21 81 -6 14 -12 85 -13 156 0 72 -6 138 -11 148 -9 16 -11 15 -23 -10z M3405 6271 c-7 -13 17 -24 40 -19 9 1 16 8 16 13 0 14 -48 19 -56 6z M82 6086 c-11 -25 -45 -249 -57 -381 -6 -67 22 -456 46 -640 63 -485 273 -1154 502 -1600 160 -310 322 -544 599 -865 112 -129 144 -188 154 -280 3 -36 14 -93 24 -127 16 -52 18 -90 16 -265 -3 -180 -6 -210 -26 -263 -23 -63 -22 -125 4 -160 19 -26 33 -12 40 38 4 27 26 74 57 123 46 72 50 82 43 119 -4 22 -9 76 -10 120 -9 218 -11 243 -28 266 -37 53 1 129 74 149 34 9 46 8 81 -10 25 -13 51 -19 64 -16 39 10 84 55 96 96 16 53 41 73 123 99 135 43 233 106 413 264 142 125 161 156 178 296 6 52 38 128 76 183 36 50 26 87 -41 156 -34 34 -77 69 -97 77 -21 9 -58 39 -84 68 -36 40 -50 49 -59 40 -14 -13 -8 -35 40 -163 37 -99 54 -219 41 -300 -13 -79 -51 -162 -86 -186 -15 -11 -50 -38 -80 -61 -29 -22 -65 -48 -81 -56 -16 -9 -55 -36 -87 -61 -100 -78 -148 -82 -312 -26 -55 19 -109 30 -142 30 -30 0 -67 7 -82 15 -16 8 -73 62 -127 121 -55 58 -119 118 -144 132 -67 37 -113 85 -204 207 -241 323 -440 689 -584 1075 -171 458 -228 760 -277 1475 -19 271 -25 327 -41 332 -6 2 -16 -8 -22 -21z M340 5496 c0 -32 36 -161 60 -211 16 -35 30 -67 30 -71 0 -4 18 -44 40 -89 37 -78 64 -125 107 -185 10 -14 26 -41 36 -60 9 -19 29 -51 45 -71 15 -20 47 -62 71 -94 210 -277 597 -635 688 -635 32 0 20 23 -30 56 -64 42 -311 252 -407 346 -129 125 -286 312 -323 385 -9 16 -23 35 -31 42 -24 20 -128 242 -181 386 -41 109 -79 190 -95 200 -5 3 -10 4 -10 1z M6405 5396 c-39 -17 -62 -52 -76 -114 -30 -127 106 -388 235 -454 79 -41 143 -21 183 57 31 59 -9 261 -68 348 -87 127 -202 195 -274 163z M1819 4944 c-19 -23 -26 -158 -8 -152 19 6 38 64 38 121 1 49 -7 58 -30 31z M2877 4821 c-10 -46 -68 -81 -137 -81 -76 0 -84 -11 -54 -68 13 -25 24 -56 24 -69 0 -13 5 -34 12 -46 19 -37 110 -137 124 -137 23 0 34 36 34 109 0 60 3 72 20 81 19 10 20 18 15 93 -8 108 -14 147 -24 147 -5 0 -11 -13 -14 -29z M1802 4429 c5 -103 11 -136 33 -194 21 -54 28 -89 29 -152 1 -73 -1 -84 -23 -107 -37 -39 -15 -54 37 -27 57 29 75 27 144 -20 76 -52 117 -64 240 -74 94 -7 138 1 138 25 0 5 -18 21 -39 36 -33 21 -46 24 -83 19 -41 -6 -45 -4 -100 47 -58 54 -132 172 -200 321 -17 37 -34 67 -38 67 -4 0 -15 -12 -25 -26 -23 -36 -33 -21 -44 64 -9 73 -34 131 -60 140 -12 4 -13 -16 -9 -119z M2990 4507 c1 -25 26 -137 33 -144 12 -11 45 19 50 44 9 47 -21 100 -65 116 -14 5 -18 1 -18 -16z M2743 4158 c-10 -12 -33 -82 -33 -100 0 -19 30 -5 55 23 17 21 25 41 23 58 -3 28 -29 39 -45 19z M2538 3997 c-13 -14 -32 -42 -42 -62 -23 -43 -12 -57 39 -48 42 8 65 21 103 56 35 34 42 67 15 67 -10 0 -35 3 -55 6 -31 5 -40 2 -60 -19z M4538 3809 c-22 -12 -23 -38 -3 -45 20 -8 45 13 45 37 0 21 -16 24 -42 8z M3665 3567 c-46 -21 -97 -84 -93 -114 5 -41 28 -49 92 -33 49 11 59 11 71 -1 12 -11 13 -22 4 -52 -17 -62 18 -85 80 -53 40 21 101 93 101 119 -1 12 -24 48 -54 81 -52 58 -54 60 -112 63 -36 2 -71 -2 -89 -10z M5087 3546 c-26 -17 -50 -41 -53 -53 -3 -12 2 -74 11 -138 14 -97 15 -131 5 -208 -15 -122 -44 -242 -86 -351 -50 -129 -45 -144 33 -111 109 46 191 -7 374 -242 86 -111 154 -176 198 -191 54 -19 56 -1 7 99 -97 201 -80 396 51 587 49 70 39 80 -57 58 -138 -31 -211 -17 -283 52 -82 79 -117 183 -126 369 -3 78 -11 146 -16 152 -6 5 -28 -3 -58 -23z M4764 2494 c-51 -39 -337 -325 -385 -385 -16 -20 -29 -42 -29 -48 0 -45 352 277 428 391 25 37 43 71 40 74 -3 2 -27 -12 -54 -32z M2155 1897 c-84 -38 -138 -165 -104 -241 15 -32 29 -37 74 -25 21 6 59 8 86 4 78 -11 122 2 195 56 49 36 76 49 101 49 39 0 51 19 35 55 -17 36 -52 55 -154 81 -125 31 -195 38 -233 21z M3062 1780 c-46 -23 -82 -55 -153 -133 l-93 -102 37 -3 c65 -6 123 31 275 170 36 33 42 72 13 87 -14 8 -32 4 -79 -19z M2739 1759 c-12 -17 -29 -55 -38 -85 -13 -40 -26 -59 -51 -77 -31 -20 -35 -28 -32 -60 1 -20 -4 -49 -12 -64 -30 -56 -246 -237 -380 -317 -66 -40 -56 -39 -208 -18 -46 6 -65 15 -92 41 -32 31 -37 33 -67 22 -44 -15 -44 -15 -89 25 -42 38 -52 40 -141 29 -42 -6 -69 -3 -103 8 -25 9 -46 12 -46 8 0 -18 60 -62 110 -80 76 -27 172 -67 255 -106 83 -39 179 -72 233 -81 30 -5 54 0 108 23 38 17 91 38 118 48 28 10 74 40 105 69 31 28 78 69 104 90 27 22 71 74 97 115 27 42 67 94 89 116 43 41 50 65 26 85 -21 18 -18 54 6 76 45 40 79 164 45 164 -8 0 -25 -14 -37 -31z M3221 1428 c-129 -127 -172 -162 -251 -207 -74 -42 -105 -54 -141 -56 -26 0 -58 -9 -72 -18 -51 -33 -87 -13 -87 47 0 14 -5 26 -11 26 -13 0 -149 -129 -149 -142 0 -42 111 -66 225 -48 107 17 183 61 338 192 37 32 85 67 108 78 22 12 64 36 92 54 29 18 84 49 122 69 39 19 79 45 90 57 l20 22 -45 39 c-25 21 -53 39 -64 39 -11 0 -84 -64 -175 -152z M3285 1069 c-33 -20 -36 -31 -30 -95 6 -60 6 -61 -23 -73 -17 -7 -46 -30 -65 -52 -20 -21 -40 -39 -46 -39 -6 0 -34 9 -63 20 -108 41 -193 36 -168 -10 19 -35 222 -135 309 -151 32 -7 55 -5 90 8 43 15 50 15 104 -1 38 -11 73 -30 100 -55 55 -50 73 -59 186 -89 83 -23 117 -26 256 -27 100 -1 177 -6 205 -14 25 -7 80 -14 122 -15 94 -1 131 19 136 77 4 51 -21 107 -50 108 -13 0 -61 10 -108 22 -97 25 -108 41 -71 101 28 44 27 105 0 140 -29 36 -127 85 -208 102 -133 28 -245 14 -332 -41 l-53 -33 -42 37 c-64 60 -206 105 -249 80z m305 -198 c12 -24 13 -51 1 -51 -5 0 -19 8 -32 19 -20 16 -21 21 -10 35 18 21 28 20 41 -3z m235 -145 c29 -19 32 -53 10 -96 -28 -54 -79 -60 -103 -12 -13 25 -24 117 -15 126 12 12 80 0 108 -18z"/></g></svg>
+      <div class="brand-txt">
+        <h1 class="eyebrow" id="eyebrow"></h1>
+      </div>
+      <label class="toerkies-wrap">
+        <span class="sr-only">Kies toer</span>
+        <select id="toerkies" hidden></select>
+      </label>
+    </div>
+    <div class="tabs" role="tablist" id="tabs"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="strap">
+    <h2 class="strap-course" id="course">Toernooi</h2>
+    <div class="strap-meta" id="meta"></div>
+  </div>
+
+  <div class="leader" id="leader"></div>
+
+  <table class="board">
+    <thead id="head"></thead>
+    <tbody id="body"></tbody>
+  </table>
+
+  <section class="alli" id="alli" hidden>
+    <h3 class="alli-kop"><span id="alli-titel">4-bal Alliansie</span><span id="alli-sub"></span></h3>
+    <div id="alli-lys"></div>
+  </section>
+
+  <p class="note">
+    Hierdie blad word na elke rondte opgedateer &mdash; die skakel bly dieselfde
+    en almal se blaaie verfris vanself.
+    <br><br>Tik op &rsquo;n speler se naam op &rsquo;n dagblad om sy kaart oop te maak:
+    bruto houe bo (sirkel onder par, blokkie bo par) en Stableford-punte onder.
+    <br><br>Elke dagblad wys daardie dag se afslaantye tot die rondte verwerk is.
+    <br><br>Die beker agter &rsquo;n naam wys hoeveel keer hy die toer gewen het, 1980 tot 2025.
+    Die 4-bal alliansie staan onderaan elke dagblad; dag 4 speel Beterbal.
+  </p>
+  <p class="stamp" id="stamp"></p>
+</main>
+
+<script>
+// DATA kom uit LGT Telling.xlsx. Die telbord-bladsy kry dit ingespuit; die
+// web-app haal dit uit data.json sodat 'n nuwe rondte deurkom sonder dat die
+// speler die app hoef te herinstalleer. Kyk heel onderaan hoe dit begin.
+var LGT_START = function (DATA) {
+  "use strict";
+
+  var TOERE = DATA.toere;            // nuutste eerste
+  var toerIdx = 0;
+
+  // Word by elke toerwisseling herbereken.
+  var ROUNDS, P, GATE, G, HOLES, TYE, ALLI, BETERBAL, TROFEE, STAMP, JOGGIES;
+  var gateByNr, players, posAfter, gespeelRondte, gabba, views;
+
+  var BEKER_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.2 3h7.6v4.7a3.8 3.8 0 0 1-7.6 0V3z"/><path fill="none" stroke="currentColor" stroke-width="1.5" d="M8.2 4.6H6.1a1.9 1.9 0 0 0 0 3.8h1M15.8 4.6h2.1a1.9 1.9 0 0 1 0 3.8h-1"/><path fill="currentColor" d="M11.15 11.3h1.7V14.4h-1.7z"/><path fill="currentColor" d="M8.7 17.3c0-1.4 1.1-2.5 2.4-2.5h1.8c1.3 0 2.4 1.1 2.4 2.5H8.7z"/><rect fill="currentColor" x="7.5" y="17.9" width="9" height="1.9" rx=".55"/></svg>';
+
+  function beker(naam) {
+    var jare = TROFEE[naam];
+    if (!jare) { return ""; }
+    var titel = jare.length === 1
+      ? "Toerwenner " + jare[0]
+      : jare.length + " toere gewen: " + jare.join(", ");
+    return '<span class="beker" title="' + titel + '">' + BEKER_SVG +
+      (jare.length > 1 ? "<b>" + jare.length + "</b>" : "") + "</span>";
+  }
+
+  // Golf notation: a handicap better than scratch is a "plus" handicap,
+  // stored as a negative index and written +2.
+  function hcp(n) { return n < 0 ? "+" + Math.abs(n) : String(n); }
+
+  // Rank on score, ties broken by lowest playing handicap, then tour number.
+  function rank(rows) {
+    rows.sort(function (a, b) {
+      return b.punte - a.punte || a.vgee - b.vgee || (a.nr || a.kamer) - (b.nr || b.kamer);
+    });
+    rows.forEach(function (row, i) {
+      row.pos = (i > 0 && rows[i - 1].punte === row.punte) ? rows[i - 1].pos : i + 1;
+    });
+    return rows;
+  }
+
+  function roundTable(i) {
+    return rank(players.map(function (p) {
+      return { nr: p.nr, naam: p.naam, idx: p.idx, vgee: p.vg[i], punte: p.stbl[i] };
+    }));
+  }
+
+  function cumTable(upTo) {
+    return rank(players.map(function (p) {
+      var t = 0;
+      for (var i = 0; i <= upTo; i++) { t += p.stbl[i]; }
+      return { nr: p.nr, naam: p.naam, idx: p.idx, vgee: p.vg[upTo], punte: t, stbl: p.stbl };
+    }));
+  }
+
+  // Kort Gat = die vier par 3'e, Lang Gat = die vier par 5'e, oor al vyf rondtes.
+  var GATE_VIEW = {
+    kort: { veld: "kort", naam: "Kortgat", koning: "Kortgatkoning",
+            sub: "Syfer 3's" },
+    lank: { veld: "lank", naam: "Langgat", koning: "Langgatkoning",
+            sub: "Syfer 5'we" }
+  };
+
+  function gateTable(veld) {
+    return rank(players.map(function (p) {
+      var per = p[veld], t = 0;
+      for (var i = 0; i < per.length; i++) { t += per[i]; }
+      return { nr: p.nr, naam: p.naam, vgee: p.vg[ROUNDS.length - 1], punte: t, per: per };
+    }));
+  }
+
+  var tabs = document.getElementById("tabs");
+  var body = document.getElementById("body");
+  var current = "tot";
+
+  // Laai een toer se data en bou die blad-knoppies daarvoor.
+  function laaiToer(i) {
+    toerIdx = i;
+    var T = TOERE[i];
+    ROUNDS = T.rondtes; P = T.spelers; GATE = T.gate; G = T.gabba;
+    HOLES = T.holes;    TYE = T.tye;   TROFEE = T.trofee; STAMP = T.stamp;
+    JOGGIES = T.joggies || {};
+    BETERBAL = T.beterbal || [];
+    ALLI = T.alliansie || {};          // ouer toere in die argief het dit dalk nie
+
+    gateByNr = {};
+    GATE.forEach(function (g) { gateByNr[g[0]] = { kort: g[1], lank: g[2] }; });
+
+    players = P.map(function (r) {
+      var g = gateByNr[r[0]] || { kort: [], lank: [] };
+      return { nr: r[0], naam: r[1], idx: r[2], stbl: r[3], vg: r[4],
+               kort: g.kort, lank: g.lank };
+    });
+
+    // Posisie na elke rondte, sodat die toernooiblad die beweging kan wys.
+    posAfter = ROUNDS.map(function (_, k) {
+      var m = {};
+      cumTable(k).forEach(function (r) { m[r.nr] = r.pos; });
+      return m;
+    });
+
+    gespeelRondte = ROUNDS.map(function (_, k) {
+      return players.some(function (p) { return p.stbl[k] > 0; });
+    });
+
+    // Kamermaats speel saam oor die hele toer; gelykop op die laagste gemiddelde voorgee.
+    gabba = G.map(function (g) {
+      return { kamer: g[0], a: g[1], aTot: g[2], b: g[3], bTot: g[4],
+               punte: g[5], vgee: g[6] };
+    });
+    rank(gabba);
+
+    var dae = [], perNaam = {};
+    ROUNDS.forEach(function (r, k) {
+      var m = /^(.*?)-\d+$/.exec(String(r.kort || "").trim());
+      if (!m) { return; }
+      var dagNaam = m[1].trim();
+      if (!perNaam[dagNaam]) {
+        perNaam[dagNaam] = { naam: dagNaam, ks: [] };
+        dae.push(perNaam[dagNaam]);
+      }
+      perNaam[dagNaam].ks.push(k);
+    });
+    dae = dae.filter(function (d) { return d.ks.length > 1; });
+
+    views = [{ id: "tot", label: "Toernooi" }];
+    ROUNDS.forEach(function (r, k) {
+      views.push({ id: "r" + k, label: r.kort, i: k });
+      dae.forEach(function (d) {
+        if (d.ks[d.ks.length - 1] === k) {
+          views.push({ id: "dag" + k, label: "Perd/Joggie", dag: d });
+        }
+      });
+    });
+    views = views.concat([
+      { id: "gabba", label: "Gatgabba" },
+      { id: "kort",  label: "Kortgat" },
+      { id: "lank",  label: "Langgat" }
+    ]);
+
+    var dele = String(T.toer).split(" · ");
+    document.getElementById("eyebrow").innerHTML = dele[0] +
+      (dele[1] ? '<span class="toernr">' + dele[1] + "</span>" : "");
+    bouTabs();
+  }
+
+  // Die speler se plek op die ranglys na elke gespeelde rondte.
+  function posStrook(nr) {
+    var uit = "", i, pos;
+    for (i = 0; i < ROUNDS.length; i++) {
+      if (!gespeelRondte[i]) { continue; }
+      pos = posAfter[i][nr];
+      uit += "<i>" + (pos || "") + "</i>";
+    }
+    return uit ? '<span class="strip">' + uit + "</span>" : "";
+  }
+
+  // Stableford: 2 punte is die par-telling, so kleur wys teenoor par.
+  // Bo die punte staan die bruto houe, met die kaart se gewone merke:
+  // sirkel onder par, blokkie bo par, dubbel vir twee of meer.
+  function brutoKlas(slae, par) {
+    if (!slae) { return ""; }
+    var d = slae - par;
+    if (d <= -2) { return " onder2"; }
+    if (d === -1) { return " onder"; }
+    if (d === 1)  { return " bo"; }
+    if (d >= 2)   { return " bo2"; }
+    return "";
+  }
+
+  function gatGrid(par, punte, bruto) {
+    function blok(van, tot, etiket) {
+      var kop = "", br = "", ry = "", som = 0, bsom = 0;
+      for (var h = van; h <= tot; h++) {
+        var pt = punte[h - 1];
+        var sl = bruto ? bruto[h - 1] : 0;
+        som += pt;
+        bsom += sl;
+        kop += '<span class="gh p' + par[h - 1] + '">' + h + "</span>";
+        if (bruto) {
+          br += '<span class="gb' + brutoKlas(sl, par[h - 1]) + '"><span>' +
+                (sl ? sl : "&ndash;") + "</span></span>";
+        }
+        ry += '<span class="gp v' + Math.min(pt, 4) + '">' +
+              (pt ? pt : "&ndash;") + "</span>";
+      }
+      kop += '<span class="gh gsom">' + etiket + "</span>";
+      if (bruto) { br += '<span class="gb gsom">' + (bsom || "&ndash;") + "</span>"; }
+      ry += '<span class="gp gsom">' + som + "</span>";
+      return '<div class="gat-ry">' + kop + br + ry + "</div>";
+    }
+    var tot = punte.reduce(function (a, b) { return a + b; }, 0);
+    var bt = bruto ? bruto.reduce(function (a, b) { return a + b; }, 0) : 0;
+    var slot = bt
+      ? "Bruto <b>" + bt + "</b> houe &middot; <b>" + tot + "</b> Stableford-punte"
+      : "Totaal <b>" + tot + "</b> punte";
+    return '<div class="gat">' + blok(1, 9, "Uit") + blok(10, 18, "In") +
+      '<div class="gat-tot">' + slot + "</div></div>";
+  }
+
+  function movement(nr) {
+    if (!gespeelRondte[ROUNDS.length - 1] || !gespeelRondte[ROUNDS.length - 2]) {
+      return '<span class="flat" title="Nog nie gespeel nie">&ndash;</span>';
+    }
+    var now = posAfter[ROUNDS.length - 1][nr];
+    var prev = posAfter[ROUNDS.length - 2][nr];
+    var d = prev - now;
+    if (d > 0)  { return '<span class="up" title="' + d + ' plekke op">&#9650;' + d + "</span>"; }
+    if (d < 0)  { return '<span class="down" title="' + (-d) + ' plekke af">&#9660;' + (-d) + "</span>"; }
+    return '<span class="flat" title="Onveranderd">&ndash;</span>';
+  }
+
+  function renderDag(d) {
+    var rows = rank(players.map(function (p) {
+      var t = 0, i;
+      for (i = 0; i < d.ks.length; i++) { t += p.stbl[d.ks[i]]; }
+      return { nr: p.nr, naam: p.naam, idx: p.idx, punte: t,
+               vgee: p.vg[d.ks[d.ks.length - 1]],
+               per: d.ks.map(function (k) { return p.stbl[k]; }) };
+    }));
+
+    document.getElementById("course").textContent = "Perd/Joggie";
+    document.getElementById("meta").textContent =
+      d.ks.map(function (k) { return ROUNDS[k].kort; }).join(" + ") +
+      " \u00b7 " + ROUNDS[d.ks[0]].baan;
+
+    var klaar = d.ks.every(function (k) { return gespeelRondte[k]; });
+    var top = rows[0];
+    document.getElementById("leader").hidden = !top || !klaar;
+    document.getElementById("leader").innerHTML = (!top || !klaar) ? "" :
+      '<div class="leader-flag">1</div>' +
+      '<div class="leader-body">' +
+        '<div class="leader-label">Wenperd</div>' +
+        '<div class="leader-name">' + top.naam + "</div>" +
+        (JOGGIES[String(top.nr)]
+          ? '<div class="leader-sub">Joggie &middot; ' + JOGGIES[String(top.nr)] + "</div>"
+          : "") +
+      "</div>" +
+      '<div class="leader-score"><b>' + top.punte + "</b><span>punte</span></div>";
+
+    document.getElementById("head").innerHTML =
+      "<tr>" +
+        '<th class="c-pos" scope="col">Pos</th>' +
+        '<th class="c-naam" scope="col">Speler</th>' +
+        '<th class="c-vgee" scope="col">Vgee</th>' +
+        '<th class="c-reeks" scope="col">Rondtes</th>' +
+        '<th class="c-punte" scope="col">Tot</th>' +
+      "</tr>";
+
+    document.getElementById("body").innerHTML = rows.map(function (r) {
+      var strook = r.per.map(function (v) { return "<i>" + v + "</i>"; }).join("");
+      return '<tr' + (r.pos <= 3 ? ' class="top"' : "") + ">" +
+        '<td class="c-pos">' + r.pos + "</td>" +
+        '<td class="c-naam">' + r.naam + beker(r.naam) +
+          '<span class="idx">' + (JOGGIES[String(r.nr)]
+            ? "Joggie &middot; " + JOGGIES[String(r.nr)]
+            : "Geen joggie") + "</span></td>" +
+        '<td class="c-vgee">' + hcp(r.vgee) + "</td>" +
+        '<td class="c-reeks"><span class="strip">' + strook + "</span></td>" +
+        '<td class="c-punte">' + r.punte + "</td>" +
+      "</tr>";
+    }).join("");
+  }
+
+  function renderGabba() {
+    document.getElementById("course").textContent = "Gatgabba";
+    document.getElementById("meta").textContent = "";
+
+    var top = gabba[0];
+    document.getElementById("leader").hidden = !top || !toerKlaar();
+    document.getElementById("leader").innerHTML = (!top || !toerKlaar()) ? "" :
+      '<div class="leader-flag">1</div>' +
+      '<div class="leader-body">' +
+        '<div class="leader-label">Gatgabba-wenners</div>' +
+        '<div class="leader-name two">' + top.a + "<br>" + top.b + "</div>" +
+      "</div>" +
+      '<div class="leader-score"><b>' + top.punte + "</b><span>punte</span></div>";
+
+    document.getElementById("head").innerHTML =
+      "<tr>" +
+        '<th class="c-pos" scope="col">Pos</th>' +
+        '<th class="c-naam" scope="col">Kamermaats</th>' +
+        '<th class="c-punte" scope="col">Gabba</th>' +
+      "</tr>";
+
+    document.getElementById("body").innerHTML = gabba.map(function (r) {
+      return '<tr' + (r.pos <= 3 ? ' class="top"' : "") + ">" +
+        '<td class="c-pos">' + r.pos + "</td>" +
+        '<td class="c-naam"><span class="pair">' + r.a + beker(r.a) + "</span>" +
+          '<span class="pair">' + r.b + beker(r.b) + "</span>" +
+          '<span class="idx">' + r.aTot + " + " + r.bTot + "</span></td>" +
+        '<td class="c-punte">' + r.punte + "</td>" +
+      "</tr>";
+    }).join("");
+  }
+
+  function toerKlaar() {
+    return gespeelRondte.every(function (v) { return v; });
+  }
+
+  function naamVanNr(nr) {
+    for (var i = 0; i < players.length; i++) {
+      if (players[i].nr === nr) { return players[i].naam; }
+    }
+    return "";
+  }
+
+  // Een rondte se balle - word op die Afslaantye-blad EN op 'n dagblad wat
+  // nog nie gespeel is nie gebruik.
+  function balleLys(balle) {
+    var uit = "";
+    for (var i = 0; i < balle.length; i++) {
+      var b = balle[i];
+      var name = b[3].map(function (nr) {
+        var n = naamVanNr(nr);
+        return '<span class="tt-speler">' + n + beker(n) + "</span>";
+      }).join("");
+      uit += '<div class="tt-bal">' +
+          '<div class="tt-wanneer"><b>' + b[2] + "</b><span>" + b[1] + " bof</span></div>" +
+          '<div class="tt-spelers">' + name + "</div>" +
+        "</div>";
+    }
+    return uit;
+  }
+
+  function renderGate(key) {
+    var cfg = GATE_VIEW[key];
+    var rows = gateTable(cfg.veld);
+
+    document.getElementById("course").textContent = cfg.naam;
+    document.getElementById("meta").textContent = cfg.sub;
+
+    var top = rows[0];
+    document.getElementById("leader").hidden = !top || !toerKlaar();
+    document.getElementById("leader").innerHTML = (!top || !toerKlaar()) ? "" :
+      '<div class="leader-flag">1</div>' +
+      '<div class="leader-body">' +
+        '<div class="leader-label">' + cfg.koning + "</div>" +
+        '<div class="leader-name">' + top.naam + "</div>" +
+      "</div>" +
+      '<div class="leader-score"><b>' + top.punte + "</b><span>punte</span></div>";
+
+    document.getElementById("head").innerHTML =
+      "<tr>" +
+        '<th class="c-pos" scope="col">Pos</th>' +
+        '<th class="c-naam" scope="col">Speler</th>' +
+        '<th class="c-reeks" scope="col">Per rondte</th>' +
+        '<th class="c-punte" scope="col">Tot</th>' +
+      "</tr>";
+
+    document.getElementById("body").innerHTML = rows.map(function (r) {
+      var strip = r.per.map(function (v) { return "<i>" + v + "</i>"; }).join("");
+      return '<tr' + (r.pos <= 3 ? ' class="top"' : "") + ">" +
+        '<td class="c-pos">' + r.pos + "</td>" +
+        '<td class="c-naam">' + r.naam + beker(r.naam) + "</td>" +
+        '<td class="c-reeks"><span class="strip">' + strip + "</span></td>" +
+        '<td class="c-punte">' + r.punte + "</td>" +
+      "</tr>";
+    }).join("");
+  }
+
+  // Die 4-bal alliansie speel op dag 1 tot 3; dag 4 speel Beterbal.
+  function renderAlli(idx) {
+    var afd = document.getElementById("alli");
+    // Die laaste rondte speel Beterbal in pare, nie 4-bal alliansie nie.
+    var isBB = BETERBAL.length > 0 && idx === ROUNDS.length - 1;
+    var rye = isBB ? BETERBAL : ALLI[String(idx)];
+    afd.hidden = !rye || !rye.length;
+    if (afd.hidden) { return; }
+
+    document.getElementById("alli-titel").textContent =
+      isBB ? "Beterbal" : "4-bal Alliansie";
+    document.getElementById("alli-sub").textContent =
+      (isBB ? "Beste bal per gat \u00b7 " : "2 tellings tel \u00b7 ") + ROUNDS[idx].baan;
+
+    document.getElementById("alli-lys").innerHTML = rye.map(function (r) {
+      var name = r[2].filter(Boolean).map(function (n) {
+        return '<span class="alli-speler">' + n + beker(n) + "</span>";
+      }).join("");
+      return '<div class="alli-bal' + (r[0] <= 3 ? " top" : "") + '">' +
+          '<div class="alli-pos"><b>' + r[0] + "</b><span>" +
+            (isBB ? "Span " : "4-bal ") + r[1] + "</span></div>" +
+          '<div class="alli-spelers">' + name +
+            '<span class="alli-vgee">Gem vgee ' + hcp(r[4]) + "</span></div>" +
+          '<div class="alli-punte"><b>' + r[3] + "</b><span>punte</span></div>" +
+        "</div>";
+    }).join("");
+  }
+
+  function render() {
+    document.getElementById("stamp").textContent = STAMP;
+    document.querySelector(".strap").classList.remove("solo");
+    document.getElementById("leader").hidden = false;
+    document.getElementById("alli").hidden = true;
+    if (current.indexOf("dag") === 0) {
+      var dv = null, vi;
+      for (vi = 0; vi < views.length; vi++) {
+        if (views[vi].id === current) { dv = views[vi].dag; }
+      }
+      if (dv) {
+        renderDag(dv);
+        Array.prototype.forEach.call(tabs.children, function (b) {
+          b.setAttribute("aria-selected", String(b.dataset.id === current));
+        });
+        return;
+      }
+    }
+    if (current === "kort" || current === "lank") {
+      renderGate(current);
+      Array.prototype.forEach.call(tabs.children, function (b) {
+        b.setAttribute("aria-selected", String(b.dataset.id === current));
+      });
+      return;
+    }
+    if (current === "gabba") {
+      renderGabba();
+      Array.prototype.forEach.call(tabs.children, function (b) {
+        b.setAttribute("aria-selected", String(b.dataset.id === current));
+      });
+      return;
+    }
+    var isTot = current === "tot";
+    var idx = isTot ? ROUNDS.length - 1 : parseInt(current.slice(1), 10);
+    var rows = isTot ? cumTable(ROUNDS.length - 1) : roundTable(idx);
+
+    document.getElementById("course").textContent =
+      isTot ? "" : ROUNDS[idx].baan;
+    document.querySelector(".strap").classList.toggle("solo", isTot);
+    document.getElementById("meta").textContent =
+      isTot ? ROUNDS.length + " rondtes · 32 spelers"
+            : ROUNDS[idx].kort + " · " + ROUNDS[idx].datum;
+
+    // Voor die eerste rondte gelaai is, help 'n reël meer as 'n bladsy vol nulle.
+    var gespeel = isTot
+      ? gespeelRondte.some(function (v) { return v; })
+      : gespeelRondte[idx];
+    if (!gespeel) {
+      document.getElementById("leader").hidden = true;
+      document.getElementById("leader").innerHTML = "";
+      document.getElementById("head").innerHTML = "";
+      if (!isTot) { renderAlli(idx); }
+      // Nog nie gespeel nie: 'n dagblad wys sy eie afslaantye tot die
+      // tellings gelaai is; daarna maak die ranglys hulle plek vol.
+      var balle = isTot ? [] : (TYE[String(idx)] || []);
+      body.innerHTML = balle.length
+        ? '<tr><td colspan="6" class="tt-houer"><div class="tt-rondte vooraf">' +
+            '<div class="tt-kop"><b>Afslaantye</b><span>' +
+              balle.length + " balle</span></div>" +
+            balleLys(balle) +
+            '<p class="tt-wag">Die tellings verskyn hier sodra die rondte verwerk is.</p>' +
+          "</div></td></tr>"
+        : '<tr><td colspan="6" class="geen-gate">' +
+            (isTot
+              ? "Die toer het nog nie begin nie &mdash; die ranglys verskyn hier sodra Dag 1 se tellings gelaai is."
+              : "Hierdie rondte is nog nie gespeel nie &mdash; die tellings verskyn hier sodra hulle gelaai is.") +
+          "</td></tr>";
+      Array.prototype.forEach.call(tabs.children, function (b) {
+        b.setAttribute("aria-selected", String(b.dataset.id === current));
+      });
+      return;
+    }
+
+    var wysLeier = isTot ? toerKlaar() : gespeelRondte[idx];
+    var top = rows[0];
+    document.getElementById("leader").hidden = !top || !wysLeier;
+    document.getElementById("leader").innerHTML = (!top || !wysLeier) ? "" :
+      '<div class="leader-flag">1</div>' +
+      '<div class="leader-body">' +
+        '<div class="leader-label">' + (isTot ? "Toerwenner" : "Renoster") + "</div>" +
+        '<div class="leader-name">' + top.naam + "</div>" +
+      "</div>" +
+      '<div class="leader-score"><b>' + top.punte + "</b><span>punte</span></div>";
+
+    document.getElementById("head").innerHTML =
+      "<tr>" +
+        '<th class="c-pos" scope="col">Pos</th>' +
+        '<th class="c-naam" scope="col">Speler</th>' +
+        '<th class="c-vgee" scope="col">Vgee</th>' +
+        '<th class="c-punte" scope="col">Punte</th>' +
+        (isTot
+          ? '<th class="c-spark" scope="col">Daaglikse posisie</th><th class="c-mov" scope="col">&plusmn;</th>'
+          : "") +
+      "</tr>";
+
+    if (!isTot) { renderAlli(idx); }
+
+    var gate = isTot ? null : HOLES[String(idx)];
+
+    body.innerHTML = rows.map(function (r) {
+      var punte = gate && gate.punte[String(r.nr)];
+      var bruto = gate && gate.bruto && gate.bruto[String(r.nr)];
+      var oop = punte
+        ? ' class="oopmaak' + (r.pos <= 3 ? " top" : "") +
+          '" tabindex="0" role="button" aria-expanded="false" data-nr="' + r.nr + '"'
+        : (r.pos <= 3 ? ' class="top"' : "");
+
+      return "<tr" + oop + ">" +
+        '<td class="c-pos">' + r.pos + "</td>" +
+        '<td class="c-naam">' + r.naam + beker(r.naam) +
+          '<span class="idx">Indeks ' + hcp(r.idx) +
+          (punte ? ' <span class="wys">' + (bruto ? "Kaart" : "Telling") +
+            ' &#9662;</span>' : "") + "</span></td>" +
+        '<td class="c-vgee">' + hcp(r.vgee) + "</td>" +
+        '<td class="c-punte">' + r.punte + "</td>" +
+        (isTot
+          ? '<td class="c-spark">' + posStrook(r.nr) + "</td>" +
+            '<td class="c-mov">' + movement(r.nr) + "</td>"
+          : "") +
+      "</tr>" +
+      (punte
+        ? '<tr class="gat-ry-houer" data-nr="' + r.nr + '" hidden><td colspan="4">' +
+          gatGrid(gate.par, punte, bruto) + "</td></tr>"
+        : "");
+    }).join("");
+
+    if (gate) {
+      Array.prototype.forEach.call(body.querySelectorAll(".oopmaak"), function (row) {
+        function wissel() {
+          var oop = row.getAttribute("aria-expanded") === "true";
+          row.setAttribute("aria-expanded", String(!oop));
+          body.querySelector('.gat-ry-houer[data-nr="' + row.dataset.nr + '"]').hidden = oop;
+        }
+        row.addEventListener("click", wissel);
+        row.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); wissel(); }
+        });
+      });
+    } else if (!isTot) {
+      var note = document.createElement("tr");
+      note.innerHTML = '<td colspan="4" class="geen-gate">' +
+        "Gat-vir-gat tellings is nog nie vir hierdie rondte gelaai nie.</td>";
+      body.appendChild(note);
+    }
+
+    Array.prototype.forEach.call(tabs.children, function (b) {
+      b.setAttribute("aria-selected", String(b.dataset.id === current));
+    });
+  }
+
+  function bouTabs() {
+    tabs.innerHTML = "";
+    views.forEach(function (v) {
+      var b = document.createElement("button");
+      b.className = "tab";
+      b.type = "button";
+      b.role = "tab";
+      b.dataset.id = v.id;
+      b.textContent = v.label;
+      b.addEventListener("click", function () {
+        current = v.id;
+        try { localStorage.setItem("lgt-view", current); } catch (e) { /* private mode */ }
+        render();
+      });
+      tabs.appendChild(b);
+    });
+    // Rondte-etikette verskil per toer, so hou net 'n blad wat hierdie toer ook het.
+    if (!views.some(function (v) { return v.id === current; })) { current = "tot"; }
+  }
+
+  // ---- toerkieser -------------------------------------------------------
+  var kies = document.getElementById("toerkies");
+  TOERE.forEach(function (t, i) {
+    var o = document.createElement("option");
+    o.value = String(i);
+    o.textContent = t.jaar;
+    kies.appendChild(o);
+  });
+  kies.hidden = TOERE.length < 2;
+  kies.addEventListener("change", function () {
+    var i = parseInt(kies.value, 10);
+    try { localStorage.setItem("lgt-toer", TOERE[i].jaar); } catch (e) { /* private mode */ }
+    laaiToer(i);
+    render();
+    window.scrollTo(0, 0);
+  });
+
+  // Begin by die nuutste toer waarvoor daar al tellings is.
+  var begin = 0;
+  for (var t = 0; t < TOERE.length; t++) {
+    var enige = TOERE[t].spelers.some(function (p) {
+      return p[3].some(function (v) { return v > 0; });
+    });
+    if (enige) { begin = t; break; }
+  }
+  try {
+    var vorige = localStorage.getItem("lgt-toer");
+    TOERE.forEach(function (t, i) { if (String(t.jaar) === vorige) { begin = i; } });
+    var saved = localStorage.getItem("lgt-view");
+    if (saved) { current = saved; }
+  } catch (e) { /* storage blocked - begin by die nuutste toer */ }
+
+  kies.value = String(begin);
+  laaiToer(begin);
+  render();
+};
+(function () {
+  "use strict";
+  // Die tellings kom uit data.json. Ons hou 'n kopie op die foon sodat die app
+  // ook oopmaak waar daar nie sein is nie.
+  function wys(d) { LGT_START(d); }
+  function onthou(teks) { try { localStorage.setItem("lgt-data", teks); } catch (e) {} }
+  function laaste() { try { return localStorage.getItem("lgt-data"); } catch (e) { return null; } }
+
+  fetch("data.json?t=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.text(); })
+    .then(function (teks) { onthou(teks); wys(JSON.parse(teks)); })
+    .catch(function () {
+      var teks = laaste();
+      if (teks) { wys(JSON.parse(teks)); return; }
+      var b = document.getElementById("body");
+      if (b) {
+        b.innerHTML = '<tr><td colspan="6" class="geen-gate">Kon nie die ' +
+          'tellings laai nie &mdash; maak weer oop wanneer jy sein het.</td></tr>';
+      }
+    });
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+  }
+}());
+</script>
+
+</body>
+</html>
