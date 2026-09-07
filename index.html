@@ -689,6 +689,7 @@ var LGT_START = function (DATA) {
   var tabs = document.getElementById("tabs");
   var body = document.getElementById("body");
   var current = "tot";
+  var gekies = false;          // het die kyker self al 'n blad gekies?
 
   // Laai een toer se data en bou die blad-knoppies daarvoor.
   function laaiToer(i) {
@@ -740,7 +741,7 @@ var LGT_START = function (DATA) {
     });
     dae = dae.filter(function (d) { return d.ks.length > 1; });
 
-    views = [{ id: "tot", label: "Toernooi" }];
+    views = [{ id: "veld", label: "Spelers" }, { id: "tot", label: "Toernooi" }];
     ROUNDS.forEach(function (r, k) {
       views.push({ id: "r" + k, label: r.kort, i: k });
       dae.forEach(function (d) {
@@ -752,9 +753,14 @@ var LGT_START = function (DATA) {
     views = views.concat([
       { id: "gabba", label: "Gatgabba" },
       { id: "kort",  label: "Kortgat" },
-      { id: "lank",  label: "Langgat" },
-      { id: "veld",  label: "Spelers" }
+      { id: "lank",  label: "Langgat" }
     ]);
+
+    // Voor die eerste rondte gelaai is, is die ranglys tog leeg - maak dan
+    // op die spelerslys oop. Sodra 'n rondte in is, open dit weer op Toernooi.
+    if (!gekies && !gespeelRondte.some(function (v) { return v; })) {
+      current = "veld";
+    }
 
     var dele = String(T.toer).split(" · ");
     document.getElementById("eyebrow").innerHTML = dele[0] +
@@ -928,14 +934,12 @@ var LGT_START = function (DATA) {
 
     document.getElementById("head").innerHTML =
       "<tr>" +
-        '<th class="c-pos" scope="col">Nr</th>' +
         '<th class="c-naam" scope="col">Speler</th>' +
         '<th class="c-punte" scope="col">Indeks</th>' +
       "</tr>";
 
     document.getElementById("body").innerHTML = rye.map(function (r) {
       return "<tr>" +
-        '<td class="c-pos">' + r.nr + "</td>" +
         '<td class="c-naam">' + r.naam + beker(r.naam) + "</td>" +
         '<td class="c-punte">' + hcp(r.idx) + "</td>" +
       "</tr>";
@@ -1203,6 +1207,7 @@ var LGT_START = function (DATA) {
       b.textContent = v.label;
       b.addEventListener("click", function () {
         current = v.id;
+        gekies = true;
         try { localStorage.setItem("lgt-view", current); } catch (e) { /* private mode */ }
         render();
       });
@@ -1213,7 +1218,11 @@ var LGT_START = function (DATA) {
   }
 
   // ---- toerkieser -------------------------------------------------------
+  // LGT_START kan weer geroep word wanneer nuwe tellings inkom, so hierdie
+  // stuk moet homself kan herhaal: die lys word eers skoongemaak, en die
+  // luisteraar word toegeken (nie bygevoeg nie) sodat hy nie verdubbel nie.
   var kies = document.getElementById("toerkies");
+  kies.innerHTML = "";
   TOERE.forEach(function (t, i) {
     var o = document.createElement("option");
     o.value = String(i);
@@ -1221,13 +1230,13 @@ var LGT_START = function (DATA) {
     kies.appendChild(o);
   });
   kies.hidden = TOERE.length < 2;
-  kies.addEventListener("change", function () {
+  kies.onchange = function () {
     var i = parseInt(kies.value, 10);
     try { localStorage.setItem("lgt-toer", TOERE[i].jaar); } catch (e) { /* private mode */ }
     laaiToer(i);
     render();
     window.scrollTo(0, 0);
-  });
+  };
 
   // Begin altyd by die huidige toer - ook voor die eerste rondte gelaai is,
   // want dan wys die dagblaaie darem die afslaantye. TOERE is nuutste eerste.
@@ -1236,7 +1245,7 @@ var LGT_START = function (DATA) {
     var vorige = localStorage.getItem("lgt-toer");
     TOERE.forEach(function (t, i) { if (String(t.jaar) === vorige) { begin = i; } });
     var saved = localStorage.getItem("lgt-view");
-    if (saved) { current = saved; }
+    if (saved) { current = saved; gekies = true; }
   } catch (e) { /* storage blocked - begin by die nuutste toer */ }
 
   kies.value = String(begin);
@@ -1245,28 +1254,69 @@ var LGT_START = function (DATA) {
 };
 (function () {
   "use strict";
-  // Die tellings kom uit data.json. Ons hou 'n kopie op die foon sodat die app
-  // ook oopmaak waar daar nie sein is nie.
-  function wys(d) { LGT_START(d); }
+  // Die tellings kom uit data.json en word ELKE keer oor die lug gaan haal:
+  // wanneer die app oopmaak, wanneer die speler daarna terugkeer, en so elke
+  // twee minute solank dit voor hom is. Ons hou net 'n kopie op die foon vir
+  // wanneer daar nie sein is nie.
+  var vorige = null;         // wat ons nou wys
+  var besig = false;
+  var laasGehaal = 0;
+
   function onthou(teks) { try { localStorage.setItem("lgt-data", teks); } catch (e) {} }
   function laaste() { try { return localStorage.getItem("lgt-data"); } catch (e) { return null; } }
 
-  fetch("data.json?t=" + Date.now(), { cache: "no-store" })
-    .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.text(); })
-    .then(function (teks) { onthou(teks); wys(JSON.parse(teks)); })
-    .catch(function () {
-      var teks = laaste();
-      if (teks) { wys(JSON.parse(teks)); return; }
-      var b = document.getElementById("body");
-      if (b) {
-        b.innerHTML = '<tr><td colspan="6" class="geen-gate">Kon nie die ' +
-          'tellings laai nie &mdash; maak weer oop wanneer jy sein het.</td></tr>';
-      }
-    });
+  function wys(teks) {
+    if (teks === vorige) { return; }     // niks nuuts nie - moenie die blad ruk nie
+    vorige = teks;
+    LGT_START(JSON.parse(teks));
+  }
+
+  function misluk() {
+    if (vorige) { return; }              // ons wys reeds iets - los dit so
+    var teks = laaste();
+    if (teks) { wys(teks); return; }
+    var b = document.getElementById("body");
+    if (b) {
+      b.innerHTML = '<tr><td colspan="6" class="geen-gate">Kon nie die ' +
+        'tellings laai nie &mdash; maak weer oop wanneer jy sein het.</td></tr>';
+    }
+  }
+
+  function haal() {
+    if (besig) { return; }
+    besig = true;
+    laasGehaal = Date.now();
+    fetch("data.json?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.text(); })
+      .then(function (teks) { onthou(teks); wys(teks); })
+      .catch(misluk)
+      .then(function () { besig = false; });
+  }
+
+  haal();
+
+  // Terug by die app (van die tuisskerm af, of uit die agtergrond): as dit
+  // meer as tien sekondes gelede was, gaan kyk of daar nuwe tellings is.
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden && Date.now() - laasGehaal > 10000) { haal(); }
+  });
+  window.addEventListener("focus", function () {
+    if (Date.now() - laasGehaal > 10000) { haal(); }
+  });
+  window.addEventListener("online", haal);
+  window.addEventListener("pageshow", function (e) { if (e.persisted) { haal(); } });
+  setInterval(function () { if (!document.hidden) { haal(); } }, 120000);
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
       navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+    // 'n nuwe weergawe van die app self: neem dadelik oor en laai een keer oor
+    var oorgeneem = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (oorgeneem) { return; }
+      oorgeneem = true;
+      window.location.reload();
     });
   }
 

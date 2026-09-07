@@ -1,7 +1,7 @@
 /* Laeveld Gholftoer - service worker.
    Die blad self kom uit die kas (vinnig, en werk sonder sein); die tellings
    kom altyd eers oor die lug, met die laaste kopie as terugval. */
-var KAS = "lgt-0cbf530f53";
+var KAS = "lgt-6b20a2bd65";
 var SKAAL = ["./", "./index.html", "./manifest.webmanifest",
              "./icon-192.png", "./icon-512.png", "./icon-180.png", "./icon-32.png"];
 
@@ -43,6 +43,10 @@ self.addEventListener("fetch", function (e) {
     return;
   }
 
+  // Die blad self: ook eers oor die lug, sodat 'n nuwe weergawe dadelik wys
+  // en niemand hoef te wonder of hy die ou een sien nie. Op 'n swak lyn wag
+  // ons hoogstens 'n paar sekondes en gryp dan die kas - so bly dit vinnig
+  // waar die sein sukkel, en heeltemal bruikbaar waar daar niks is nie.
   e.respondWith(
     caches.match(req, { ignoreSearch: true }).then(function (kas) {
       var lug = fetch(req).then(function (r) {
@@ -51,8 +55,10 @@ self.addEventListener("fetch", function (e) {
           caches.open(KAS).then(function (c) { c.put(req, kopie); });
         }
         return r;
-      }).catch(function () { return kas; });
-      return kas || lug;
+      });
+      if (!kas) { return lug; }
+      var wag = new Promise(function (los) { setTimeout(function () { los(kas); }, 3000); });
+      return Promise.race([lug.catch(function () { return kas; }), wag]);
     })
   );
 });
