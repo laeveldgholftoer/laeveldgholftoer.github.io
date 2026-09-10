@@ -423,6 +423,12 @@
     font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim);
   }
 
+  /* die perd/joggie-trekking: twee gelyke kolomme, albei links */
+  .board .c-perd, .board .c-jog { width: 50%; text-align: left; }
+  .board .c-jog { padding-left: 10px; color: var(--text-dim); }
+  .board tbody .c-perd { font-size: 15px; }
+  .board tbody .c-jog { font-size: 14px; }
+
   .board .c-reeks { width: 108px; padding-left: 8px; }
   .board tbody .c-reeks .strip {
     display: inline-flex; gap: 1px; font-family: "Saira Condensed", "Arial Narrow", sans-serif;
@@ -848,14 +854,30 @@ var LGT_START = function (DATA) {
       d.ks.map(function (k) { return ROUNDS[k].kort; }).join(" + ") +
       " \u00b7 " + ROUNDS[d.ks[0]].baan;
 
-    // Nog niks van hierdie dag gespeel nie - 'n re\u00ebl s\u00ea meer as 32 nulle.
+    // Nog niks van hierdie dag gespeel nie: wys dan die trekking self - wie
+    // het wie getrek - want dis waarna almal soek voor die dag. Die tellings
+    // kom in hierdie tabel se plek sodra die rondtes verwerk is.
     if (!d.ks.some(function (k) { return gespeelRondte[k]; })) {
       document.getElementById("leader").hidden = true;
       document.getElementById("leader").innerHTML = "";
-      document.getElementById("head").innerHTML = "";
+
+      var trek = players.slice().sort(function (a, b) {
+        return a.naam.localeCompare(b.naam);
+      });
+      document.getElementById("head").innerHTML =
+        "<tr>" +
+          '<th class="c-perd" scope="col">Perd</th>' +
+          '<th class="c-jog" scope="col">Joggie</th>' +
+        "</tr>";
       document.getElementById("body").innerHTML =
-        '<tr><td colspan="5" class="geen-gate">Die perde en joggies is getrek &mdash; ' +
-        'die tellings verskyn hier sodra ' +
+        trek.map(function (p) {
+          var jog = JOGGIES[String(p.nr)];
+          return "<tr>" +
+            '<td class="c-perd">' + p.naam + beker(p.naam) + "</td>" +
+            '<td class="c-jog">' + (jog || "geen joggie") + "</td>" +
+          "</tr>";
+        }).join("") +
+        '<tr><td colspan="2" class="geen-gate">Die tellings verskyn hier sodra ' +
         d.ks.map(function (k) { return ROUNDS[k].kort; }).join(" en ") +
         " gespeel is.</td></tr>";
       return;
