@@ -424,6 +424,45 @@
   }
 
   /* die perd/joggie-trekking: twee gelyke kolomme, albei links */
+  /* Voorgee-blad: die bof-kieser en die smal dagkolomme. */
+  .bofkies { margin: 0 0 14px; }
+  .bofkies-kop {
+    display: block; font-size: 10px; font-weight: 600; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--text-dim); margin-bottom: 7px;
+    font-family: "Source Sans 3", sans-serif;
+  }
+  .bofkies-ry { display: flex; flex-wrap: wrap; gap: 6px; }
+  .bofkies-ry button {
+    padding: 6px 11px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--rule); background: var(--surface);
+    color: var(--text-dim); font: inherit; font-size: 13px; line-height: 1.2;
+  }
+  .bofkies-ry button:hover { color: var(--text); border-color: var(--text-dim); }
+  .bofkies-ry button[aria-pressed="true"] {
+    background: var(--crest); border-color: var(--crest); color: var(--crest-gold);
+    font-weight: 600;
+  }
+  .board .c-idx { width: 40px; padding-left: 6px; }
+  .board tbody .c-idx { font-size: 13px; color: var(--text-dim); }
+  .board .c-vg { width: 38px; padding-left: 6px; }
+  .board thead .c-vg { vertical-align: bottom; }
+  .board thead .c-vg .vg-dag { display: block; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--text); }
+  .board thead .c-vg .vg-bof {
+    display: block; font-size: 9px; font-weight: 500; letter-spacing: .04em;
+    text-transform: none; opacity: .75; margin-top: 2px;
+  }
+  .board thead .c-vg .vg-bof.terug { color: var(--accent); opacity: 1; }
+  .board tbody .c-vg {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 18px; font-weight: 600;
+  }
+  .vg-legende {
+    margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--rule-soft);
+    font-size: 12px; line-height: 1.5; color: var(--text-dim);
+  }
+  .vg-legende b { color: var(--text); font-weight: 600; }
+  .vg-legende .vg-reel { display: block; }
+
   .board .c-perd, .board .c-jog { width: 50%; text-align: left; }
   .board .c-jog { padding-left: 10px; color: var(--text-dim); }
   .board tbody .c-perd { font-size: 15px; }
@@ -599,10 +638,17 @@
 
   <div class="leader" id="leader"></div>
 
+  <div class="bofkies" id="bofkies" hidden>
+    <span class="bofkies-kop">Van watter bof speel jy?</span>
+    <div class="bofkies-ry" id="bofkies-ry" role="group" aria-label="Kies bof"></div>
+  </div>
+
   <table class="board">
     <thead id="head"></thead>
     <tbody id="body"></tbody>
   </table>
+
+  <div class="vg-legende" id="vg-legende" hidden></div>
 
   <section class="alli" id="alli" hidden>
     <h3 class="alli-kop"><span id="alli-titel">4-bal Alliansie</span><span id="alli-sub"></span></h3>
@@ -632,7 +678,7 @@ var LGT_START = function (DATA) {
   var toerIdx = 0;
 
   // Word by elke toerwisseling herbereken.
-  var ROUNDS, P, GATE, G, HOLES, TYE, ALLI, BETERBAL, TROFEE, STAMP, JOGGIES;
+  var ROUNDS, P, GATE, G, HOLES, TYE, ALLI, BETERBAL, TROFEE, STAMP, JOGGIES, BANE;
   var gateByNr, players, posAfter, gespeelRondte, gabba, views;
 
   var BEKER_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.2 3h7.6v4.7a3.8 3.8 0 0 1-7.6 0V3z"/><path fill="none" stroke="currentColor" stroke-width="1.5" d="M8.2 4.6H6.1a1.9 1.9 0 0 0 0 3.8h1M15.8 4.6h2.1a1.9 1.9 0 0 1 0 3.8h-1"/><path fill="currentColor" d="M11.15 11.3h1.7V14.4h-1.7z"/><path fill="currentColor" d="M8.7 17.3c0-1.4 1.1-2.5 2.4-2.5h1.8c1.3 0 2.4 1.1 2.4 2.5H8.7z"/><rect fill="currentColor" x="7.5" y="17.9" width="9" height="1.9" rx=".55"/></svg>';
@@ -706,14 +752,17 @@ var LGT_START = function (DATA) {
     JOGGIES = T.joggies || {};
     BETERBAL = T.beterbal || [];
     ALLI = T.alliansie || {};          // ouer toere in die argief het dit dalk nie
+    BANE = T.bane || [];               // [baan, tee, slope, BG, par] per bof
 
     gateByNr = {};
     GATE.forEach(function (g) { gateByNr[g[0]] = { kort: g[1], lank: g[2] }; });
 
     players = P.map(function (r) {
       var g = gateByNr[r[0]] || { kort: [], lank: [] };
+      // r[5] is die baanvoorgee per rondte. Ouer toere in die argief is nog
+      // sonder dit gebou - vir hulle is die speelvoorgee die naaste ding.
       return { nr: r[0], naam: r[1], idx: r[2], stbl: r[3], vg: r[4],
-               kort: g.kort, lank: g.lank };
+               bvg: r[5] || r[4], kort: g.kort, lank: g.lank };
     });
 
     // Posisie na elke rondte, sodat die toernooiblad die beweging kan wys.
@@ -747,7 +796,9 @@ var LGT_START = function (DATA) {
     });
     dae = dae.filter(function (d) { return d.ks.length > 1; });
 
-    views = [{ id: "veld", label: "Spelers" }, { id: "tot", label: "Toernooi" }];
+    views = [{ id: "veld", label: "Spelers" }];
+    if (BANE.length) { views.push({ id: "vgee", label: "Voorgee" }); }
+    views.push({ id: "tot", label: "Toernooi" });
     ROUNDS.forEach(function (r, k) {
       views.push({ id: "r" + k, label: r.kort, i: k });
       dae.forEach(function (d) {
@@ -981,6 +1032,126 @@ var LGT_START = function (DATA) {
     }).join("");
   }
 
+  // ---- Voorgee -------------------------------------------------------------
+  // Wat elke speler se baanvoorgee vir elke dag is, net uit sy indeks en die
+  // dag se bof. Geen aanpassing vir tellings nie - dit is presies die syfer wat
+  // ScoreCapture as "CH" wys, sodat 'n speler self kan sien syne is reg.
+
+  var bofKeuse = "";        // "" beteken: die bof waarvan die toer daardie dag speel
+  try { bofKeuse = localStorage.getItem("lgt-bof") || ""; } catch (e) {}
+
+  function bofLys() {
+    var gesien = {}, uit = [];
+    BANE.forEach(function (b) {
+      if (!gesien[b[1]]) { gesien[b[1]] = 1; uit.push(b[1]); }
+    });
+    return uit;
+  }
+
+  function baanReel(baan, bof) {
+    for (var i = 0; i < BANE.length; i++) {
+      if (BANE[i][0] === baan && BANE[i][1] === bof) { return BANE[i]; }
+    }
+    return null;
+  }
+
+  // Excel se ROUND() rond 'n half weg van nul af; JavaScript s'n rond op. Dit
+  // maak net by 'n plus-voorgee 'n verskil, maar dan maak dit een slag verskil.
+  function rondaf(x) { return x < 0 ? -Math.round(-x) : Math.round(x); }
+
+  // Baanvoorgee = indeks x slope / 113 + (baangradering - par).
+  function baanVgee(idx, reel) { return rondaf(idx * reel[2] / 113 + (reel[3] - reel[4])); }
+
+  function kortDag(kort) {
+    return String(kort || "").replace(/^\s*(Dag|Rondte)\s*/i, "").trim() || kort;
+  }
+
+  function bouBofKnoppies() {
+    var houer = document.getElementById("bofkies-ry");
+    var opsies = [["", "Toerbof"]];
+    bofLys().forEach(function (b) { opsies.push([b, b]); });
+    houer.innerHTML = opsies.map(function (o) {
+      return '<button type="button" data-bof="' + o[0] + '" aria-pressed="' +
+        (o[0] === bofKeuse) + '">' + o[1] + "</button>";
+    }).join("");
+    Array.prototype.forEach.call(houer.children, function (k) {
+      k.onclick = function () {
+        bofKeuse = k.dataset.bof;
+        try { localStorage.setItem("lgt-bof", bofKeuse); } catch (e) {}
+        renderVgee();
+      };
+    });
+  }
+
+  function renderVgee() {
+    var rye = players.slice().sort(function (a, b) {
+      return a.idx - b.idx || a.naam.localeCompare(b.naam);
+    });
+
+    // Watter bof geld vir elke rondte? Ken die baan nie die gekose bof nie,
+    // val ons terug op die toerbof - en ons sê dit so, sonder om stil te maak.
+    var perDag = ROUNDS.map(function (r) {
+      var eie = bofKeuse ? baanReel(r.baan, bofKeuse) : null;
+      return { r: r, reel: eie || baanReel(r.baan, r.tee),
+               bof: eie ? bofKeuse : r.tee, eie: !!eie,
+               terug: !!(bofKeuse && !eie) };
+    });
+
+    document.getElementById("course").textContent = "Voorgee";
+    document.querySelector(".strap").classList.remove("solo");
+    document.getElementById("meta").textContent =
+      "Net uit die indeks \u00b7 geen aanpassing vir tellings";
+    document.getElementById("leader").innerHTML = "";
+    document.getElementById("leader").hidden = true;
+    document.getElementById("bofkies").hidden = false;
+    bouBofKnoppies();
+
+    document.getElementById("head").innerHTML =
+      "<tr>" +
+        '<th class="c-naam" scope="col">Speler</th>' +
+        '<th class="c-idx" scope="col">Idx</th>' +
+        perDag.map(function (d) {
+          return '<th class="c-vg" scope="col">' +
+            '<span class="vg-dag">' + kortDag(d.r.kort) + "</span>" +
+            '<span class="vg-bof' + (d.terug ? " terug" : "") + '">' +
+              (d.bof || "&ndash;") + "</span></th>";
+        }).join("") +
+      "</tr>";
+
+    document.getElementById("body").innerHTML = rye.map(function (p) {
+      return "<tr>" +
+        '<td class="c-naam">' + p.naam + beker(p.naam) + "</td>" +
+        '<td class="c-idx">' + hcp(p.idx) + "</td>" +
+        perDag.map(function (d, i) {
+          if (!d.reel) { return '<td class="c-vg">&ndash;</td>'; }
+          // Sonder 'n eie keuse gebruik ons die werkboek se eie syfer, sodat
+          // die blad wys wat werklik gespeel word, nie 'n herberekening nie.
+          var v = d.eie ? baanVgee(p.idx, d.reel) : p.bvg[i];
+          return '<td class="c-vg">' + hcp(v) + "</td>";
+        }).join("") +
+      "</tr>";
+    }).join("");
+
+    var terug = perDag.filter(function (d) { return d.terug; });
+    document.getElementById("vg-legende").innerHTML =
+      perDag.map(function (d) {
+        return '<span class="vg-reel"><b>' + d.r.kort + "</b> &middot; " +
+          d.r.baan + (d.reel
+            ? " &middot; " + d.bof + " bof &middot; slope " + d.reel[2] +
+              ", BG " + d.reel[3] + ", par " + d.reel[4]
+            : "") + "</span>";
+      }).join("") +
+      (terug.length
+        ? '<span class="vg-reel" style="margin-top:8px">' +
+          terug.map(function (d) { return d.r.baan; })
+               .filter(function (n, i, a) { return a.indexOf(n) === i; })
+               .join(", ") +
+          " het nie &rsquo;n " + bofKeuse + "-bof nie &mdash; daar wys ons die toerbof." +
+          "</span>"
+        : "");
+    document.getElementById("vg-legende").hidden = false;
+  }
+
   function toerKlaar() {
     return gespeelRondte.every(function (v) { return v; });
   }
@@ -1079,6 +1250,15 @@ var LGT_START = function (DATA) {
     document.querySelector(".strap").classList.remove("solo");
     document.getElementById("leader").hidden = false;
     document.getElementById("alli").hidden = true;
+    document.getElementById("bofkies").hidden = true;
+    document.getElementById("vg-legende").hidden = true;
+    if (current === "vgee") {
+      renderVgee();
+      Array.prototype.forEach.call(tabs.children, function (b) {
+        b.setAttribute("aria-selected", String(b.dataset.id === current));
+      });
+      return;
+    }
     if (current.indexOf("dag") === 0) {
       var dv = null, vi;
       for (vi = 0; vi < views.length; vi++) {
