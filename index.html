@@ -848,6 +848,19 @@ var LGT_START = function (DATA) {
       d.ks.map(function (k) { return ROUNDS[k].kort; }).join(" + ") +
       " \u00b7 " + ROUNDS[d.ks[0]].baan;
 
+    // Nog niks van hierdie dag gespeel nie - 'n re\u00ebl s\u00ea meer as 32 nulle.
+    if (!d.ks.some(function (k) { return gespeelRondte[k]; })) {
+      document.getElementById("leader").hidden = true;
+      document.getElementById("leader").innerHTML = "";
+      document.getElementById("head").innerHTML = "";
+      document.getElementById("body").innerHTML =
+        '<tr><td colspan="5" class="geen-gate">Die perde en joggies is getrek &mdash; ' +
+        'die tellings verskyn hier sodra ' +
+        d.ks.map(function (k) { return ROUNDS[k].kort; }).join(" en ") +
+        " gespeel is.</td></tr>";
+      return;
+    }
+
     var klaar = d.ks.every(function (k) { return gespeelRondte[k]; });
     var top = rows[0];
     document.getElementById("leader").hidden = !top || !klaar;
