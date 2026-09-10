@@ -1037,7 +1037,7 @@ var LGT_START = function (DATA) {
   // dag se bof. Geen aanpassing vir tellings nie - dit is presies die syfer wat
   // ScoreCapture as "CH" wys, sodat 'n speler self kan sien syne is reg.
 
-  var bofKeuse = "";        // "" beteken: die bof waarvan die toer daardie dag speel
+  var bofKeuse = "";        // word by die eerste teken op 'n regte bof gestel
   try { bofKeuse = localStorage.getItem("lgt-bof") || ""; } catch (e) {}
 
   function bofLys() {
@@ -1066,13 +1066,19 @@ var LGT_START = function (DATA) {
     return String(kort || "").replace(/^\s*(Dag|Rondte)\s*/i, "").trim() || kort;
   }
 
+  // Wit is die bof waarvan die meeste van die toer speel, so daarmee maak die
+  // blad oop as die speler nog nie self gekies het nie.
+  function stelBof() {
+    var lys = bofLys();
+    if (lys.indexOf(bofKeuse) !== -1) { return; }
+    bofKeuse = lys.indexOf("White") !== -1 ? "White" : (lys[0] || "");
+  }
+
   function bouBofKnoppies() {
     var houer = document.getElementById("bofkies-ry");
-    var opsies = [["", "Toerbof"]];
-    bofLys().forEach(function (b) { opsies.push([b, b]); });
-    houer.innerHTML = opsies.map(function (o) {
-      return '<button type="button" data-bof="' + o[0] + '" aria-pressed="' +
-        (o[0] === bofKeuse) + '">' + o[1] + "</button>";
+    houer.innerHTML = bofLys().map(function (b) {
+      return '<button type="button" data-bof="' + b + '" aria-pressed="' +
+        (b === bofKeuse) + '">' + b + "</button>";
     }).join("");
     Array.prototype.forEach.call(houer.children, function (k) {
       k.onclick = function () {
@@ -1084,6 +1090,7 @@ var LGT_START = function (DATA) {
   }
 
   function renderVgee() {
+    stelBof();
     var rye = players.slice().sort(function (a, b) {
       return a.idx - b.idx || a.naam.localeCompare(b.naam);
     });
@@ -1091,10 +1098,9 @@ var LGT_START = function (DATA) {
     // Watter bof geld vir elke rondte? Ken die baan nie die gekose bof nie,
     // val ons terug op die toerbof - en ons sê dit so, sonder om stil te maak.
     var perDag = ROUNDS.map(function (r) {
-      var eie = bofKeuse ? baanReel(r.baan, bofKeuse) : null;
+      var eie = baanReel(r.baan, bofKeuse);
       return { r: r, reel: eie || baanReel(r.baan, r.tee),
-               bof: eie ? bofKeuse : r.tee, eie: !!eie,
-               terug: !!(bofKeuse && !eie) };
+               bof: eie ? bofKeuse : r.tee, eie: !!eie, terug: !eie };
     });
 
     document.getElementById("course").textContent = "Voorgee";
