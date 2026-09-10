@@ -1310,23 +1310,44 @@ var LGT_START = function (DATA) {
 
   // Terug by die app (van die tuisskerm af, of uit die agtergrond): as dit
   // meer as tien sekondes gelede was, gaan kyk of daar nuwe tellings is.
+  function terug() {
+    kykVirNuweApp();                       // is daar 'n nuwe weergawe van die app?
+    if (Date.now() - laasGehaal > 10000) { haal(); }   // en nuwe tellings?
+  }
   document.addEventListener("visibilitychange", function () {
-    if (!document.hidden && Date.now() - laasGehaal > 10000) { haal(); }
+    if (!document.hidden) { terug(); }
   });
-  window.addEventListener("focus", function () {
-    if (Date.now() - laasGehaal > 10000) { haal(); }
-  });
-  window.addEventListener("online", haal);
-  window.addEventListener("pageshow", function (e) { if (e.persisted) { haal(); } });
-  setInterval(function () { if (!document.hidden) { haal(); } }, 120000);
+  window.addEventListener("focus", terug);
+  window.addEventListener("online", terug);
+  window.addEventListener("pageshow", function (e) { if (e.persisted) { terug(); } });
+  setInterval(function () { if (!document.hidden) { terug(); } }, 120000);
+
+  // 'n Nuwe weergawe van die APP self (nie net nuwe tellings nie) moet ook
+  // vanself deurkom. Op 'n foon bly die app dikwels in die geheue, so daar is
+  // nie noodwendig 'n nuwe bladlaai wanneer die speler terugkeer nie - ons vra
+  // dan self vir die service worker om te gaan kyk. Kry hy 'n nuwe weergawe,
+  // neem dit oor en die blad laai een keer oor. Niemand hoef ooit iets af te
+  // haal en weer op te sit nie.
+  var hadBeheer = false;
+  function kykVirNuweApp() {
+    if (!("serviceWorker" in navigator)) { return; }
+    navigator.serviceWorker.getRegistration()
+      .then(function (r) { if (r) { return r.update(); } })
+      .catch(function () {});
+  }
 
   if ("serviceWorker" in navigator) {
+    hadBeheer = !!navigator.serviceWorker.controller;
     window.addEventListener("load", function () {
       navigator.serviceWorker.register("sw.js").catch(function () {});
     });
-    // 'n nuwe weergawe van die app self: neem dadelik oor en laai een keer oor
     var oorgeneem = false;
     navigator.serviceWorker.addEventListener("controllerchange", function () {
+      // Die heel eerste keer neem die service worker bloot oor - die blad wat
+      // die speler sien is klaar die nuutste, so daar is niks om oor te laai
+      // nie. Enige keer DAARNA beteken dit 'n nuwe weergawe van die app het
+      // ingekom, en dan laai ons een keer oor sodat hy dit dadelik sien.
+      if (!hadBeheer) { hadBeheer = true; return; }
       if (oorgeneem) { return; }
       oorgeneem = true;
       window.location.reload();
