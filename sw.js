@@ -1,7 +1,7 @@
 /* Laeveld Gholftoer - service worker.
    Die blad self kom uit die kas (vinnig, en werk sonder sein); die tellings
    kom altyd eers oor die lug, met die laaste kopie as terugval. */
-var KAS = "lgt-a74a749488";
+var KAS = "lgt-23f28ba4a0";
 var SKAAL = ["./", "./index.html", "./manifest.webmanifest",
              "./icon-192.png", "./icon-512.png", "./icon-180.png", "./icon-32.png"];
 
