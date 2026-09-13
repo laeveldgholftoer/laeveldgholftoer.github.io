@@ -463,6 +463,20 @@
   .vg-legende b { color: var(--text); font-weight: 600; }
   .vg-legende .vg-reel { display: block; }
 
+  /* Weddenskappe */
+  .board .c-eenh { width: 60px; padding-left: 8px; }
+  .board .c-rand { width: 74px; padding-left: 8px; }
+  .board tbody .c-eenh {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 17px; font-weight: 600; color: var(--text-dim);
+  }
+  .board tbody .c-rand {
+    font-family: "Saira Condensed", "Arial Narrow", sans-serif;
+    font-size: 19px; font-weight: 700;
+  }
+  .board tbody .wen { color: var(--bar); }
+  .board tbody .verloor { color: var(--rooi, var(--accent)); }
+
   .board .c-perd, .board .c-jog { width: 50%; text-align: left; }
   .board .c-jog { padding-left: 10px; color: var(--text-dim); }
   .board tbody .c-perd { font-size: 15px; }
@@ -678,7 +692,7 @@ var LGT_START = function (DATA) {
   var toerIdx = 0;
 
   // Word by elke toerwisseling herbereken.
-  var ROUNDS, P, GATE, G, HOLES, TYE, ALLI, BETERBAL, TROFEE, STAMP, JOGGIES, BANE;
+  var ROUNDS, P, GATE, G, HOLES, TYE, ALLI, BETERBAL, TROFEE, STAMP, JOGGIES, BANE, WED;
   var gateByNr, players, posAfter, gespeelRondte, gabba, views;
 
   var BEKER_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.2 3h7.6v4.7a3.8 3.8 0 0 1-7.6 0V3z"/><path fill="none" stroke="currentColor" stroke-width="1.5" d="M8.2 4.6H6.1a1.9 1.9 0 0 0 0 3.8h1M15.8 4.6h2.1a1.9 1.9 0 0 1 0 3.8h-1"/><path fill="currentColor" d="M11.15 11.3h1.7V14.4h-1.7z"/><path fill="currentColor" d="M8.7 17.3c0-1.4 1.1-2.5 2.4-2.5h1.8c1.3 0 2.4 1.1 2.4 2.5H8.7z"/><rect fill="currentColor" x="7.5" y="17.9" width="9" height="1.9" rx=".55"/></svg>';
@@ -753,6 +767,7 @@ var LGT_START = function (DATA) {
     BETERBAL = T.beterbal || [];
     ALLI = T.alliansie || {};          // ouer toere in die argief het dit dalk nie
     BANE = T.bane || [];               // [baan, tee, slope, BG, par] per bof
+    WED = T.wed || null;               // weddenskappe, of null as daar nog niks is
 
     gateByNr = {};
     GATE.forEach(function (g) { gateByNr[g[0]] = { kort: g[1], lank: g[2] }; });
@@ -812,6 +827,7 @@ var LGT_START = function (DATA) {
       { id: "kort",  label: "Kortgat" },
       { id: "lank",  label: "Langgat" }
     ]);
+    if (WED && WED.rye && WED.rye.length) { views.push({ id: "wed", label: "Weddenskappe" }); }
 
     // Voor die eerste rondte gelaai is, is die ranglys tog leeg - maak dan
     // op die spelerslys oop. Sodra 'n rondte in is, open dit weer op Toernooi.
@@ -1158,6 +1174,59 @@ var LGT_START = function (DATA) {
     document.getElementById("vg-legende").hidden = false;
   }
 
+  // Elke toerlid speel elke rondte teen elke ander toerlid: wen +1, verloor -1.
+  // Dit is 'n nulsom - wat die een wen, betaal 'n ander. Uitgeslote spelers kry
+  // 'n streep; hulle tel vir niemand nie en niemand tel vir hulle nie.
+  function renderWed() {
+    var speel = WED.rye.filter(function (r) { return r[2] !== null; });
+    var som = speel.reduce(function (a, r) { return a + r[2]; }, 0);
+
+    document.getElementById("course").textContent = "Weddenskappe";
+    document.querySelector(".strap").classList.remove("solo");
+    document.getElementById("meta").textContent =
+      "R" + WED.tarief + " per rondte \u00b7 elkeen teen elke ander";
+    document.getElementById("leader").innerHTML = "";
+    document.getElementById("leader").hidden = true;
+
+    document.getElementById("head").innerHTML =
+      "<tr>" +
+        '<th class="c-pos" scope="col">Pos</th>' +
+        '<th class="c-naam" scope="col">Speler</th>' +
+        '<th class="c-eenh" scope="col">Eenhede</th>' +
+        '<th class="c-rand" scope="col">Rand</th>' +
+      "</tr>";
+
+    var pos = 0, vorige = null;
+    document.getElementById("body").innerHTML = WED.rye.map(function (r, i) {
+      if (r[2] === null) {
+        return "<tr>" +
+          '<td class="c-pos"></td>' +
+          '<td class="c-naam">' + r[1] + beker(r[1]) +
+            '<span class="idx">Uitgesluit</span></td>' +
+          '<td class="c-eenh">&ndash;</td><td class="c-rand">&ndash;</td>' +
+        "</tr>";
+      }
+      if (r[2] !== vorige) { pos = i + 1; vorige = r[2]; }
+      var klas = r[2] > 0 ? " wen" : (r[2] < 0 ? " verloor" : "");
+      return "<tr>" +
+        '<td class="c-pos">' + pos + "</td>" +
+        '<td class="c-naam">' + r[1] + beker(r[1]) + "</td>" +
+        '<td class="c-eenh' + klas + '">' +
+          (r[2] > 0 ? "+" + r[2] : (r[2] < 0 ? "\u2212" + Math.abs(r[2]) : "0")) + "</td>" +
+        '<td class="c-rand' + klas + '">' + (r[3] > 0 ? "+R" + r[3] : (r[3] < 0 ? "\u2212R" + Math.abs(r[3]) : "R0")) + "</td>" +
+      "</tr>";
+    }).join("");
+
+    document.getElementById("vg-legende").hidden = false;
+    document.getElementById("vg-legende").innerHTML =
+      '<span class="vg-reel">Wen &rsquo;n rondte teen \u2019n ander speler en jy kry ' +
+      '<b>+1</b>, verloor jy <b>&minus;1</b>, gelykop <b>0</b>. \u2019n Rondte tel net ' +
+      'wanneer albei spelers \u2019n telling het.</span>' +
+      '<span class="vg-reel" style="margin-top:8px">' + speel.length +
+      " spelers speel mee \u00b7 die lys tel op na <b>" + som +
+      "</b>, want wat die een wen betaal \u2019n ander.</span>";
+  }
+
   function toerKlaar() {
     return gespeelRondte.every(function (v) { return v; });
   }
@@ -1242,8 +1311,13 @@ var LGT_START = function (DATA) {
         return '<span class="alli-speler">' + n + beker(n) + "</span>";
       }).join("");
       return '<div class="alli-bal' + (r[0] <= 3 ? " top" : "") + '">' +
-          '<div class="alli-pos"><b>' + r[0] + "</b><span>" +
-            (isBB ? "Span " : "4-bal ") + r[1] + "</span></div>" +
+          '<div class="alli-pos"><b>' + r[0] + "</b>" +
+            // ScoreCapture se Beterbal-uitvoer gee sy eie interne spannommers
+            // (91, 92, 93 ...). Dit beteken niks vir die speler nie, so ons wys
+            // dit net wanneer dit werklik 'n spannommer van hierdie toer is.
+            ((!isBB || (r[1] >= 1 && r[1] <= rye.length))
+              ? "<span>" + (isBB ? "Span " : "4-bal ") + r[1] + "</span>" : "") +
+          "</div>" +
           '<div class="alli-spelers">' + name +
             '<span class="alli-vgee">Gem vgee ' + hcp(r[4]) + "</span></div>" +
           '<div class="alli-punte"><b>' + r[3] + "</b><span>punte</span></div>" +
@@ -1287,6 +1361,13 @@ var LGT_START = function (DATA) {
     }
     if (current === "kort" || current === "lank") {
       renderGate(current);
+      Array.prototype.forEach.call(tabs.children, function (b) {
+        b.setAttribute("aria-selected", String(b.dataset.id === current));
+      });
+      return;
+    }
+    if (current === "wed") {
+      renderWed();
       Array.prototype.forEach.call(tabs.children, function (b) {
         b.setAttribute("aria-selected", String(b.dataset.id === current));
       });
